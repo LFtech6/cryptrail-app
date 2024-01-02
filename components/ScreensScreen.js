@@ -21,6 +21,34 @@ export default function ScreensScreen({ navigation }) {
         title="Go to Forgot Password"
         onPress={() => navigation.navigate("Forgot")}
       />
+      <Button
+        title="Go to Favcoins"
+        onPress={() => navigation.navigate("Favcoins")}
+      />
+      <Button
+        title="Go to Navigation Bar"
+        onPress={() => navigation.navigate("Navigation")}
+      />
+      <Button
+        title="Go to Profile"
+        onPress={() => navigation.navigate("Profile")}
+      />
+      <Button
+        title="Go to Dashboard"
+        onPress={() => navigation.navigate("Dashboard")}
+      />
+      <Button
+        title="Go to Cryp"
+        onPress={() => navigation.navigate("Cryp")}
+      />
+      <Button
+        title="Go to CoinsInfo"
+        onPress={() => navigation.navigate("Coins")}
+      />
+      <Button
+        title="Go to News"
+        onPress={() => navigation.navigate("News")}
+      />
     </View>
   );
 }

@@ -5,8 +5,18 @@ const ForgotPasswordScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
           <View style={styles.yellowBackground}>
-            <Text style={styles.loginTitle}>Esqueci-me da palavra passe</Text>
+            <Text style={styles.title}>Forgot Password</Text>
           </View>
+        <View style={styles.write}>
+          <Text style={styles.Text}>
+          Write your email so we can send you instructions of how to reset your password.
+          </Text>
+          <TextInput placeholder="Username/Email" style={styles.placeholder} onPress={() => Alert.alert('Username or Email')}>
+        </TextInput>
+        <TouchableOpacity style={styles.buttonBox} onPress={() => Alert.alert('Sent')}>
+          <Text style={styles.buttonText}>Send</Text>
+        </TouchableOpacity>
+        </View>
           </View>
 )};
 
@@ -25,10 +35,45 @@ yellowBackground: {
   borderBottomRightRadius: 63,
   paddingHorizontal: 20, 
 },
-loginTitle: {
+title: {
   fontSize: 48,
   color: '#000',
-},  
+},
+placeholder: {
+  borderWidth: 1,
+  borderRadius: 25,
+  paddingVertical: 5,
+  paddingHorizontal: 20,
+  marginVertical: 10,
+  width: 250,
+  alignItems: 'center',
+  fontSize: 17,
+  marginTop: 50,
+},
+write: {
+  alignItems: 'center',
+  marginTop: 50,
+},
+Text: {
+  textAlign: 'center',
+  marginTop: 30,
+  width: '70%',
+  fontSize: 16,
+},
+buttonBox: {
+  borderWidth: 1,
+  borderRadius: 25,
+  paddingVertical: 5,
+  paddingHorizontal: 20,
+  marginVertical: 10,
+  width: 250,
+  alignItems: 'center',
+  marginTop: 100,
+},
+buttonText: {
+  fontSize: 17,
+  textAlign: 'center',
+},
 });
 
 export default ForgotPasswordScreen;

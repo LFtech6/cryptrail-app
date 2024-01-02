@@ -1,34 +1,138 @@
-import React from 'react';
-import { Alert, Button, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, TextInput, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import axios from 'axios';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 const SignupScreen = ({ navigation }) => {
+
+  //register "startpoint"
+  const [userRegister] = useState('');
+  const sendToReg = async () => {
+    console.log('sending request');
+    try {
+      const response = await axios.post('http://192.168.1.77:3000/register', {
+        username: name,
+        email: email,
+        password: password
+    });    
+    } catch (error) {
+        console.error('Error communicating with Register:', error);
+    }
+};
+
+//register requirements
+    const [name, setName] = useState(''); 
+    const [email, setEmail] = useState(''); 
+    const [password, setPassword] = useState(''); 
+    const [errors, setErrors] = useState({}); 
+    const [isFormValid, setIsFormValid] = useState(false); 
+  
+    useEffect(() => { 
+        validateForm(); 
+    }, [name, email, password]); 
+
+    const validateForm = () => { 
+        let errors = {}; 
+  
+        if (!name) { 
+            errors.name = 'Name is required.'; 
+        } 
+        //for change email validator
+        if (!email) { 
+            errors.email = 'Email is required.'; 
+        } else if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) { 
+            errors.email = 'Email is invalid.'; 
+        } 
+        if (!password) { 
+            errors.password = 'Password is required.'; 
+        } else if (password.length == 8) { 
+            errors.password = 'Password requires 8 characters.'; 
+        } 
+        setErrors(errors); 
+        setIsFormValid(Object.keys(errors).length === 0); 
+    }; 
+  
+    const handleSubmit = () => { 
+        if (isFormValid) { 
+            console.log('Form submitted successfully!'); 
+        } else { 
+            console.log('Form has errors. Please correct them.'); 
+        } 
+    }; 
+  
+//hide and unhide password
+    const [showPassword, setShowPassword] = useState(false); 
+  
+    const toggleShowPassword = () => { 
+        setShowPassword(!showPassword); 
+    }; 
+  
+//page
   return (
     <View style={styles.container}>
       <View style={styles.yellowBackground}>
-        <Text style={styles.loginTitle}>Registo</Text>
-      </View>
-
+        <Text style={styles.title}>Register</Text>
+      </View> 
       <View style={styles.write}>
-        <TextInput placeholder="Username" style={styles.placeholder} onPress={() => Alert.alert('Username')}>
-        </TextInput>
-        <TextInput placeholder="Email" style={styles.placeholder} onPress={() => Alert.alert('Email')}>
-        </TextInput>
-        <TextInput placeholder="Password" style={styles.placeholder} onPress={() => Alert.alert('Password')}>
-        </TextInput>
-        </View>
-        <View style={styles.button}>
-        <TouchableOpacity style={styles.buttonBox} onPress={() => Alert.alert('Criar')}>
-          <Text style={styles.create}>Criar</Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} acessible={false}>
+      <SafeAreaView>
+      <TextInput 
+                style={styles.placeholder} 
+                placeholder="Name"
+                value={name} 
+                onChangeText={setName} 
+            /> 
+            <TextInput 
+                style={styles.placeholder} 
+                placeholder="Email"
+                value={email} 
+                onChangeText={setEmail} 
+            /> 
+            <TextInput
+                secureTextEntry={!showPassword} 
+                value={password} 
+                onChangeText={setPassword} 
+                style={styles.placeholder} 
+                placeholder="Password"
+                placeholderTextColor="#aaa"
+              />
+            <MaterialCommunityIcons style={styles.icon}
+                name={showPassword ? 'eye-off' : 'eye'} 
+                size={24} 
+                color="#aaa"
+                onPress={toggleShowPassword} 
+            />
+            <View style={styles.button}>
+            <TouchableOpacity 
+                style={[styles.buttonBox,  { opacity: isFormValid ? 1 : 0.5 }]} 
+                disabled={!isFormValid} 
+                onPress={() => {
+                  handleSubmit();
+                  sendToReg();
+                  navigation.navigate("Dashboard");
+              }}
+            > 
+                <Text style={styles.buttonText}>Create</Text>
         </TouchableOpacity>
-        <View>
-          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.underlinedText}>Já tens uma conta?</Text>
+        </View>
+        </SafeAreaView>
+        </TouchableWithoutFeedback>
+            {/* Display error messages */} 
+            {Object.values(errors).map((error, index) => ( 
+                <Text key={index} style={styles.error}> 
+                    {error} 
+                </Text> 
+            ))} 
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={styles.underlinedText}>Already have an account?</Text>
           </TouchableOpacity>
-          </View>
       </View>
     </View>
 )};
 
+//styles
 const styles = StyleSheet.create({
   container: {
   flex: 1,
@@ -44,35 +148,39 @@ yellowBackground: {
   borderBottomRightRadius: 63,
   paddingHorizontal: 20, 
 },
-loginTitle: {
+title: {
   fontSize: 48,
   color: '#000',
 },  
 button: {
   alignItems: 'center',
-  marginTop: 50,
+  marginTop: 30,
 },
 buttonBox: {
-  borderWidth: 1,
   borderRadius: 25,
   paddingVertical: 5,
   paddingHorizontal: 20,
   marginVertical: 10,
   width: 250,
   alignItems: 'center',
+  backgroundColor: '#B3B3B3',
+},
+icon: {
+  textAlign: 'center',
 },
 write: {
   alignItems: 'center',
-  marginTop: 50,
+  marginTop: -20,
 },
 placeholder: {
-  borderWidth: 1,
   borderRadius: 25,
   paddingVertical: 5,
   paddingHorizontal: 20,
   marginVertical: 10,
   width: 250,
   alignItems: 'center',
+  fontSize: 17,
+  backgroundColor: '#E6E6E6',
 },
 user: {
   marginTop: 20,
@@ -94,9 +202,13 @@ create: {
   fontSize: 18,
 },
 underlinedText: {
-  marginTop: 100,
+  marginTop: 60,
   textAlign: 'center',
   textDecorationLine: 'underline',
+},
+buttonText: {
+  fontSize: 18,
+  textAlign: 'center',
 },
 });
 

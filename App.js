@@ -7,6 +7,13 @@ import ScreensScreen from "./components/ScreensScreen";
 import LoginScreen from "./components/LoginScreen";
 import RegisterScreen from "./components/RegisterScreen";
 import ForgotPasswordScreen from "./components/ForgotPasswordScreen";
+import FavCoinsScreen from "./components/FavCoinsScreen";
+import ProfileScreen from "./components/ProfileScreen";
+import DashboardScreen from "./components/DashboardScreen";
+import CrypScreen from "./components/CrypScreen";
+import CoinsInfoScreen from "./components/CoinsInfoScreen";
+import NewsScreen from "./components/NewsScreen";
+import NavigationBar from "./components/NavigationBar";
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +26,13 @@ export default function App() {
         <Stack.Screen name="Signup" component={RegisterScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Forgot" component={ForgotPasswordScreen} />
+        <Stack.Screen name="Favcoins" component={FavCoinsScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Dashboard" component={DashboardScreen} />
+        <Stack.Screen name="Cryp" component={CrypScreen} />
+        <Stack.Screen name="Coins" component={CoinsInfoScreen} />
+        <Stack.Screen name="News" component={NewsScreen} />
+        <Stack.Screen name="Navigation" component={NavigationBar} />
       </Stack.Navigator>
     </NavigationContainer>
   );

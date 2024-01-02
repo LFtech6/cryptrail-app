@@ -6,29 +6,29 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.yellowBackground}>
-        <Text style={styles.loginTitle}>Cryptrail</Text>
-        <Text style={styles.loginDesc}>Discover your crypto Journey</Text>
+        <Text style={styles.title}>Cryptrail</Text>
+        <Text style={styles.desc}>Discover your crypto Journey</Text>
       </View>
 
       <View style={styles.buttons}>
         <TouchableOpacity style={styles.buttonBox} onPress={() => Alert.alert('Continuar com Google')}>
           <FontAwesome name="google" style={styles.icon} />
-          <Text style={styles.buttonText}>Continuar com Google</Text>
+          <Text style={styles.buttonText}>Continue with Google</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonBox} onPress={() => Alert.alert('Continuar com Apple')}>
-          <FontAwesome name="apple" style={styles.icon} />
-          <Text style={styles.buttonText}>Continuar com Apple </Text>
+          <FontAwesome name="apple" style={styles.icon}/>
+          <Text style={styles.buttonText}>Continue with Apple </Text>
         </TouchableOpacity>
 
         <Text style={styles.or}>ou</Text>
 
         <TouchableOpacity style={styles.log} onPress={() => navigation.navigate("Signup")}>
-          <Text style={styles.buttonText}>Criar conta</Text>
+          <Text style={styles.buttonText}>Create account</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.underlinedText}>Já tens uma conta?</Text>
+          <Text style={styles.underlinedText}>Already have an account?</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -50,11 +50,11 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 63,
     paddingHorizontal: 20, 
   },
-  loginTitle: {
+  title: {
     fontSize: 48,
     color: '#000',
   },
-  loginDesc: {
+  desc: {
     fontSize: 16,
     color: '#000',
     marginTop: 8,
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12.5,
     marginVertical: 20,
-    width: 135,
+    width: 161,
     textAlign: 'center',
   },
   or: {
@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
   underlinedText: {
     marginTop: 130,
     textDecorationLine: 'underline',
+    textAlign: 'center',
   },
 });
 
