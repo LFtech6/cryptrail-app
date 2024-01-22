@@ -1,69 +1,120 @@
-import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+//LoginScreen
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, TextInput, Image, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView} from 'react-native';
+import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { responsiveFontSize, responsiveHeight, responsiveWidth, responsiveScreenWidth, responsiveScreenHeight, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 
-const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const SigninScreen = ({ navigation }) => {
+  
+//login requirements
+const [email, setEmail] = useState(''); 
+const [password, setPassword] = useState(''); 
+const [errors, setErrors] = useState({}); 
+const [isFormValid, setIsFormValid] = useState(false); 
 
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post('http://192.168.1.191:3000/login', { email, password });
-      await AsyncStorage.setItem('token', response.data.token);
-      // Navigate to the next screen or show success message
-    } catch (error) {
-      Alert.alert('Login Failed', error.response.data.error);
-    }
-  };
-  //hide and unhide password
-  const [showPassword, setShowPassword ] = useState(false); 
+useEffect(() => { 
+  validateForm(); 
+}, [email, password]); 
+
+const validateForm = () => { 
+  let errors = {}; 
+  // Validate email field 
+  if (!email) { 
+    errors.email = 'Email is required.'; 
+  } else if (!/\S+@\S+\.\S+/.test(email)) { 
+    errors.email = 'Email is invalid.'; 
+  } 
+  //missing database connection for login 
   
-  const toggleShowPassword = () => { 
-    setShowPassword(!showPassword); 
-  }; 
+  // Validate password field 
+  if (!password) { 
+    errors.password = 'Password is required.'; 
+  } else if (password.length < 8) { 
+    errors.password = 'Password must be at least 8 characters.'; 
+  } 
   
-  //page
-  return (
-    <View style={styles.container}>
-    <View style={styles.yellowBackground}>
-    <Text style={styles.title}>Login</Text>
-    </View>
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} acessible={false}>
-    <SafeAreaView>
-    <View style={styles.write} >
-    <TextInput onChangeText={setEmail} placeholder="Email" style={styles.placeholder}>
-    </TextInput>
-    <TextInput
-    secureTextEntry={!showPassword} 
-    onChangeText={setPassword} 
-    style={styles.placeholder} 
-    placeholder="Password"
-    placeholderTextColor="#aaa"
-    />
-    <MaterialCommunityIcons style={styles.icon}
-    name={showPassword ? 'eye-off' : 'eye'} 
-    size={24} 
-    color="#aaa"
-    onPress={toggleShowPassword} 
-    />
-    </View>
-    <View style={styles.button}>
-    <TouchableOpacity style={styles.buttonBox} onPress={handleLogin}>
-    <Text style={styles.buttonText}>Enter</Text>
+  // Set the errors and update form validity 
+  setErrors(errors); 
+  setIsFormValid(Object.keys(errors).length === 0); 
+}; 
+const handleSubmit = () => { 
+  if (isFormValid) { 
+    console.log('Form submitted successfully!'); 
+  } else { 
+    console.log('Form has errors. Please correct them.'); 
+  } 
+}; 
+
+//hide and unhide password
+const [showPassword, setShowPassword] = useState(false); 
+
+const toggleShowPassword = () => { 
+  setShowPassword(!showPassword); 
+}; 
+
+//page
+return (
+  <View style={styles.container}>
+  <View style={styles.yellowBackground}>
+  <Image source={require('../assets/cryptrail.png')} style={styles.cryptrail}/>
+  <Text style={styles.title}>Login</Text>
+  </View> 
+  <KeyboardAvoidingView>
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+  <View style={styles.write}>
+  <SafeAreaView>
+  <TextInput 
+  style={styles.placeholder} 
+  placeholder="Email"
+  value={email} 
+  onChangeText={setEmail} 
+  /> 
+  <TextInput
+  secureTextEntry={!showPassword} 
+  value={password} 
+  onChangeText={setPassword} 
+  style={styles.placeholder} 
+  placeholder="Password"
+  placeholderTextColor="#aaa"
+  />
+  <MaterialCommunityIcons style={styles.icon}
+  name={showPassword ? 'eye-off' : 'eye'} 
+  size={24} 
+  color="#aaa"
+  onPress={toggleShowPassword} 
+  />
+  <View style={styles.button}>
+  <TouchableOpacity 
+  style={[styles.buttonBox,  { opacity: isFormValid ? 1 : 0.5 }]} 
+  disabled={!isFormValid} 
+  onPress={() => {
+    handleSubmit();
+    //sendToLog(); the one missing part of login connection to database
+    navigation.navigate("Dashboard");
+  }}
+  > 
+  <Text style={styles.buttonText}>Enter</Text>
+  </TouchableOpacity>
+  </View>
+  </SafeAreaView>
+  {/* Display error messages */} 
+  {Object.values(errors).map((error, index) => ( 
+    <Text key={index} style={styles.error}> 
+    {error} 
+    </Text> 
+    ))} 
+    <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
+    <Text style={styles.underlinedText}>Forgot your password?</Text>
     </TouchableOpacity>
-    <View>
-    <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-    <Text style={styles.underlinedText}>Don´t have an account yet?</Text>
-    </TouchableOpacity>
     </View>
-    </View>
-    </SafeAreaView>
     </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
     </View>
     )};
     
+    //styles
     const styles = StyleSheet.create({
       container: {
         flex: 1,
@@ -79,49 +130,47 @@ const LoginScreen = ({ navigation }) => {
         borderBottomRightRadius: 63,
         paddingHorizontal: 20, 
       },
+      cryptrail: {
+        height: responsiveScreenHeight(3.5),
+        width: responsiveScreenHeight(80),
+        resizeMode: 'contain',
+        marginBottom: 69,
+      },
       title: {
         fontSize: 48,
         color: '#000',
+        marginBottom: 109,
       },  
       button: {
         alignItems: 'center',
-        marginTop: 95,
+        marginTop: 30,
       },
       buttonBox: {
-        borderWidth: 1,
         borderRadius: 25,
         paddingVertical: 5,
         paddingHorizontal: 20,
         marginVertical: 10,
         width: 250,
         alignItems: 'center',
+        backgroundColor: '#B3B3B3',
+      },
+      icon: {
+        textAlign: 'center',
       },
       write: {
         alignItems: 'center',
-        marginTop: -20,
+        marginTop: 10,
       },
       placeholder: {
-        borderRadius: 25,
-        paddingVertical: 5,
+        borderRadius: 15,
+        paddingVertical: 10,
         paddingHorizontal: 20,
         marginVertical: 10,
         width: 250,
         alignItems: 'center',
         fontSize: 17,
         backgroundColor: '#E6E6E6',
-      },
-      user: {
-        marginTop: 20,
-        fontSize: 18,
-        alignItems: 'flex-start',
-      },
-      email: {
-        marginTop: 20,
-        fontSize: 18,
-        color: '#000',
-      },
-      password: {
-        marginTop: 20,
+        marginTop: 5,
         fontSize: 18,
         color: '#000',
       },
@@ -129,15 +178,19 @@ const LoginScreen = ({ navigation }) => {
         marginTop: 20,
         fontSize: 18,
       },
-      underlinedText: {
-        marginTop: 135,
-        textAlign: 'center',
-        textDecorationLine: 'underline',
-      },
       buttonText: {
         fontSize: 18,
         textAlign: 'center',
       },
+      error: { 
+        color: 'red', 
+        fontSize: 11, 
+      },
+      underlinedText: {
+        marginTop: 60,
+        textAlign: 'center',
+        textDecorationLine: 'underline',
+      }, 
     });
     
-    export default SignupScreen;
+    export default SigninScreen;

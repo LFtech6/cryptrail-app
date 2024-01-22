@@ -1,3 +1,4 @@
+//ScreensScreen
 import React from "react";
 import { Button, View, Text } from "react-native";
 
@@ -22,12 +23,8 @@ export default function ScreensScreen({ navigation }) {
         onPress={() => navigation.navigate("Forgot")}
       />
       <Button
-        title="Go to Favcoins"
-        onPress={() => navigation.navigate("Favcoins")}
-      />
-      <Button
-        title="Go to Navigation Bar"
-        onPress={() => navigation.navigate("Navigation")}
+        title="Go to Watchlist"
+        onPress={() => navigation.navigate("Watchlist")}
       />
       <Button
         title="Go to Profile"
@@ -38,11 +35,11 @@ export default function ScreensScreen({ navigation }) {
         onPress={() => navigation.navigate("Dashboard")}
       />
       <Button
-        title="Go to Cryp"
-        onPress={() => navigation.navigate("Cryp")}
+        title="Go to Trail"
+        onPress={() => navigation.navigate("Trail")}
       />
       <Button
-        title="Go to CoinsInfo"
+        title="Go to Coins"
         onPress={() => navigation.navigate("Coins")}
       />
       <Button

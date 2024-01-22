@@ -1,0 +1,48 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthRequest } from 'expo-auth-session/providers/google';
+
+
+const HomeScreen = ({ navigation }) => {
+  const[userInfo, setUserInfo] = React.useState(null);
+  const [request, response, promptAsync] = useAuthRequest({
+    iosClientId: "214437951610-4vahh88akbg3sothh9as989o60l9hmtd.apps.googleusercontent.com",
+    webClientId: "214437951610-h92vofo0uo7hhblrk5iuc74enlv5uapu.apps.googleusercontent.com",
+  });
+
+  React.useEffect(() => {
+    handleSignInWithGoogle();
+  }, [response])
+
+  async function handleSignInWithGoogle() {
+    const user = await AsyncStorage.getItem("@user");
+    debugger;
+    if (!user) {
+      if(response?. type === "success") {
+        await getUserInfo(response.authentication.accessToken);
+      }
+    } else {
+      setUserInfo(JSON.parse(user));
+    }
+  }
+
+  const getUserInfo = async (token) => {
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const user = await response.json();
+
+      await AsyncStorage.setItem("@user", JSON.stringify(user));
+      
+      setUserInfo(user);
+    } catch (error) {
+
+    }
+  }
+}
