@@ -8,7 +8,7 @@ container: {
     alignItems: 'center',
 },
 yellowBackground: {
-    backgroundColor: '#FFC107',
+    backgroundColor: '#FFD464',
     width: '100%',
     height: '43%',
     justifyContent: 'center',

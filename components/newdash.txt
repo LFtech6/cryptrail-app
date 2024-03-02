@@ -8,7 +8,7 @@ const DashScreen = ({ navigation }) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const menuAnimation = useRef(new Animated.Value(responsiveWidth(75))).current; // Menu initially positioned off-screen to the right
   const contentAnimation = useRef(new Animated.Value(0)).current; // Content initially in its normal position
-  
+
   const toggleMenu = () => {
     Animated.parallel([
       Animated.timing(menuAnimation, {
@@ -22,17 +22,20 @@ const DashScreen = ({ navigation }) => {
         useNativeDriver: true,
       })
     ]).start();
-    
+
     setMenuVisible(!menuVisible);
   };
+
   const Dcoins = [
     { label: 'Bitcoin', value: 'bitcoin' },
     { label: 'Ethereum', value: 'ethereum' },
   ];
+
   const coins = [
     { label: 'Euro', value: 'euro' },
     { label: 'Dollar', value: 'dollar' },
   ];
+
   const watchlist = [
     { key: 'bitcoin', symbol: 'BTC' },
     { key: 'ethereum', symbol: 'ETH' },
@@ -46,102 +49,113 @@ const DashScreen = ({ navigation }) => {
     { key: 'binanceCoin', symbol: 'BNB' },
     { key: 'tether', symbol: 'USDT' },
   ];
-  
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Animated.View style={[
-          styles.menu,
-          {
-            transform: [{ translateX: menuAnimation }],
-          },
-        ]}>
-          <Text style={styles.menuItem}>Profile</Text>
-          <Text style={styles.menuItem}>Settings</Text>
-          {/* Additional menu items */}
-        </Animated.View>
-        
-        <Animated.View style={[
-          styles.content,
-          {
-            transform: [{ translateX: contentAnimation }],
-          },
-        ]}>
-          <TouchableOpacity onPress={toggleMenu}>
-        <Image source={require('../assets/me2.png')} style={styles.user} />
-      </TouchableOpacity>
-          <Text style={styles.title}>Converter</Text>
-          <RNPickerSelect
-            onValueChange={(value) => setSelectedCoin(value)}
-            items={Dcoins}
-            style={pickerSelectStyles}
-            placeholder={{ label: 'Select a coin...', value: null }}
-          />
-          <RNPickerSelect
-            onValueChange={(value) => setSelectedCoin(value)}
-            items={coins}
-            style={pickerSelectStyles}
-            placeholder={{ label: 'Select a currency...', value: null }}
-          />
-        </Animated.View>
-      </View>
+      <Animated.View style={[
+        styles.content,
+        {
+          transform: [{ translateX: contentAnimation }],
+        },
+      ]}>
+        <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
+          <Image source={require('../assets/me2.png')} style={styles.menuIcon} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Converter</Text>
+        <RNPickerSelect
+          onValueChange={(value) => setSelectedCoin(value)}
+          items={Dcoins}
+          style={pickerSelectStyles}
+          placeholder={{ label: 'Select a coin...', value: null }}
+        />
+        <RNPickerSelect
+          onValueChange={(value) => setSelectedCoin(value)}
+          items={coins}
+          style={pickerSelectStyles}
+          placeholder={{ label: 'Select a currency...', value: null }}
+        />
+        <Text style={styles.watchlistTitle}>Watchlist</Text>
+        <FlatList
+          data={watchlist}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.coinButton}>
+              <Text style={styles.coinText}>{item.symbol}</Text>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.key}
+          style={styles.scrollView}
+        />
+      </Animated.View>
+
+      <Animated.View style={[
+        styles.menu,
+        {
+          transform: [{ translateX: menuAnimation }],
+        },
+      ]}>
+        <Text style={styles.menuItem}>Profile</Text>
+        <Text style={styles.menuItem}>Settings</Text>
+        {/* Additional menu items */}
+      </Animated.View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  user: {
+  menuIcon: {
     height: responsiveScreenHeight(5),
-    width: responsiveWidth(180),
-    marginTop: 50,
+    width: responsiveWidth(10),
     resizeMode: 'contain',
   },
+  menuButton: {
+    alignSelf: 'flex-start',
+    marginTop: responsiveHeight(2),
+    marginLeft: responsiveWidth(2),
+  },
   title: {
-    fontSize: 35,
+    fontSize: responsiveFontSize(3.5),
     color: '#000',
-    marginTop: 20,
-    marginHorizontal: 20,
+    marginTop: responsiveHeight(2),
   },
   watchlistTitle: {
-    fontSize: 35,
+    fontSize: responsiveFontSize(2.5),
     color: '#000',
-    marginTop: 30,
-    marginHorizontal: 20,
+    marginTop: responsiveHeight(2),
   },
-  scrollView: {
-    marginHorizontal: 20,
-    marginBottom: 80,
-  },
-  coinButton: {
-    backgroundColor: '#E5E3E3',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  coinText: {
-    fontSize: responsiveFontSize(2.2),
-    color: '#000',
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
+  content: {
+    flex: 1,
+    alignItems: 'center',
   },
   menu: {
     position: 'absolute',
-    top: -100,
-    right: -50,
-    bottom: -600,
+    top: 0,
+    right: 0,
+    bottom: 0,
     width: responsiveWidth(75),
     backgroundColor: '#fff',
-    padding: 20,
+    padding: responsiveWidth(5),
     justifyContent: 'center',
   },
-  
   menuItem: {
-    fontSize: 20,
-    marginBottom: 10,
+    fontSize: responsiveFontSize(2.5),
+    paddingVertical: responsiveHeight(2),
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: '#ddd',
+    marginBottom: responsiveHeight(2),
+  },
+  coinButton: {
+    backgroundColor: '#E5E3E3',
+    padding: responsiveHeight(2),
+    borderRadius: 10,
+    marginVertical: responsiveHeight(1),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  coinText: {
+    fontSize: responsiveFontSize(2.2),
+  },
+  scrollView: {
+    width: '100%',
   },
 });
 
@@ -155,9 +169,10 @@ const pickerSelectStyles = StyleSheet.create({
     borderRadius: 4,
     color: 'black',
     paddingRight: 30, // to ensure the text is never behind the icon
-    marginHorizontal: 20,
-    marginTop: 20,
+    width: '90%', // Ensure picker occupies most of the width
+    marginTop: responsiveHeight(1),
   },
+  // Add Android styles if necessary
 });
 
 export default DashScreen;

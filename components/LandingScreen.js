@@ -1,10 +1,8 @@
 //HomeScreen
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View, Image, KeyboardAvoidingView, SafeAreaView } from 'react-native';
-import { responsiveFontSize, responsiveHeight, responsiveWidth, responsiveScreenWidth, responsiveScreenHeight, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
+import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
 import { FontAwesome } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuthRequest } from 'expo-auth-session/providers/google';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -24,7 +22,7 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonBox} onPress={() => Alert.alert('Continuar com Apple')}>
+        <TouchableOpacity style={styles.buttonBox} onPress={() => navigation.navigate("Dashboard0")}>
           <FontAwesome name="apple" style={styles.icon}/>
           <Text style={styles.buttonText}>Continue with Apple </Text>
         </TouchableOpacity>
@@ -51,7 +49,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   yellowBackground: {
-    backgroundColor: '#FFC107',
+    backgroundColor: '#FFD464',
     width: '100%',
     height: '43%',
     justifyContent: 'flex-end', // Adjust the alignment of items within the yellow background
@@ -130,3 +128,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+

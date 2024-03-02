@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Image} from 'react-native';
-import { responsiveFontSize, responsiveHeight, responsiveWidth, responsiveScreenWidth, responsiveScreenHeight, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
-import axios from 'axios';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   
 //login requirements
-const [email, setEmail] = useState(''); 
-const [errors, setErrors] = useState({}); 
+const [email, setEmail] = useState('');
+const [errors, setErrors] = useState({});  
 const [isFormValid, setIsFormValid] = useState(false); 
 
 useEffect(() => { 
@@ -24,11 +22,6 @@ const validateForm = () => {
   } else if (!/\S+@\S+\.\S+/.test(email)) { 
     errors.email = 'Email is invalid.'; 
   } 
-  //missing database connection for login 
-
-  // Set the errors and update form validity 
-  setErrors(errors); 
-  setIsFormValid(Object.keys(errors).length === 0); 
 }; 
 const handleSubmit = () => { 
   if (isFormValid) { 
@@ -40,13 +33,12 @@ const handleSubmit = () => {
 
 //page
 return (
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
   <View style={styles.container}>
   <View style={styles.yellowBackground}>
   <Image source={require('../assets/cryptrail.png')} style={styles.cryptrail}/>
   <Text style={styles.title}>Forgot Password</Text>
   </View> 
-  <KeyboardAvoidingView>
-  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
   <View style={styles.write}>
   <Text style={styles.Text}>
     Write your email so we can send you instructions of how to reset your password.
@@ -79,9 +71,8 @@ return (
     </Text> 
     ))} 
     </View>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
     </View>
+    </TouchableWithoutFeedback>
     )};
     
     //styles
@@ -91,7 +82,7 @@ return (
         justifyContent: 'flex-start',
       },
       yellowBackground: {
-        backgroundColor: '#FFC107',
+        backgroundColor: '#FFD464',
         width: '100%',
         height: '43%',
         justifyContent: 'center',

@@ -1,16 +1,30 @@
 //LoginScreen
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, TextInput, Image, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView} from 'react-native';
+import {  Alert, StyleSheet, Text, TouchableOpacity, View, TextInput, Image, TouchableWithoutFeedback, Keyboard, SafeAreaView} from 'react-native';
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { responsiveFontSize, responsiveHeight, responsiveWidth, responsiveScreenWidth, responsiveScreenHeight, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 
 const SigninScreen = ({ navigation }) => {
-  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('http://192.168.1.86:3000/login', {
+        email,
+        password,
+      });
+      console.log(response.data);
+      navigation.navigate('Dashboard0'); 
+    } catch (error) {
+      console.error('Login Error:', error);
+      Alert.alert('Login Failed', 'Invalid email or password. Please try again.');
+    }
+  };
+
+
 //login requirements
-const [email, setEmail] = useState(''); 
-const [password, setPassword] = useState(''); 
 const [errors, setErrors] = useState({}); 
 const [isFormValid, setIsFormValid] = useState(false); 
 
@@ -56,13 +70,12 @@ const toggleShowPassword = () => {
 
 //page
 return (
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
   <View style={styles.container}>
   <View style={styles.yellowBackground}>
   <Image source={require('../assets/cryptrail.png')} style={styles.cryptrail}/>
   <Text style={styles.title}>Login</Text>
   </View> 
-  <KeyboardAvoidingView>
-  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
   <View style={styles.write}>
   <SafeAreaView>
   <TextInput 
@@ -89,11 +102,7 @@ return (
   <TouchableOpacity 
   style={[styles.buttonBox,  { opacity: isFormValid ? 1 : 0.5 }]} 
   disabled={!isFormValid} 
-  onPress={() => {
-    handleSubmit();
-    //sendToLog(); the one missing part of login connection to database
-    navigation.navigate("Dashboard");
-  }}
+  onPress={ handleLogin }
   > 
   <Text style={styles.buttonText}>Enter</Text>
   </TouchableOpacity>
@@ -109,9 +118,8 @@ return (
     <Text style={styles.underlinedText}>Forgot your password?</Text>
     </TouchableOpacity>
     </View>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
     </View>
+    </TouchableWithoutFeedback>
     )};
     
     //styles
@@ -121,7 +129,7 @@ return (
         justifyContent: 'flex-start',
       },
       yellowBackground: {
-        backgroundColor: '#FFC107',
+        backgroundColor: '#FFD464',
         width: '100%',
         height: '43%',
         justifyContent: 'center',
@@ -159,7 +167,7 @@ return (
       },
       write: {
         alignItems: 'center',
-        marginTop: 10,
+        marginTop: 60,
       },
       placeholder: {
         borderRadius: 15,

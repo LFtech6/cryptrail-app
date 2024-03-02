@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View, TextInput, TouchableWithoutFe
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { responsiveFontSize, responsiveHeight, responsiveWidth, responsiveScreenWidth, responsiveScreenHeight, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
+import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
 
 const SignupScreen = ({ navigation }) => {
   
@@ -13,7 +13,7 @@ const SignupScreen = ({ navigation }) => {
   const sendToReg = async () => {
     console.log('sending request');
     try {
-      const response = await axios.post('http://213.58.193.37:3000/register', {
+      const response = await axios.post('http://192.168.1.86:3000/register', {
       username: name,
       email: email,
       password: password
@@ -77,13 +77,12 @@ const toggleShowPassword = () => {
 
 //page
 return (
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
   <View style={styles.container}>
   <View style={styles.yellowBackground}>
   <Image source={require('../assets/cryptrail.png')} style={styles.cryptrail}/>
   <Text style={styles.title}>Register</Text>
-  </View> 
-  <KeyboardAvoidingView>
-  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+  </View>
   <View style={styles.write}>
   <SafeAreaView>
   <TextInput 
@@ -119,7 +118,7 @@ return (
   onPress={() => {
     handleSubmit();
     sendToReg();
-    navigation.navigate("Dashboard");
+    navigation.navigate("Dashboard0");
   }}
   > 
   <Text style={styles.buttonText}>Create</Text>
@@ -136,9 +135,8 @@ return (
     <Text style={styles.underlinedText}>Already have an account?</Text>
     </TouchableOpacity>
     </View>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
     </View>
+    </TouchableWithoutFeedback>
     )};
     
     //styles
@@ -148,7 +146,7 @@ return (
         justifyContent: 'flex-start',
       },
       yellowBackground: {
-        backgroundColor: '#FFC107',
+        backgroundColor: '#FFD464',
         width: '100%',
         height: '43%',
         justifyContent: 'center',
@@ -185,8 +183,7 @@ return (
         textAlign: 'center',
       },
       write: {
-        alignItems: 'center',
-        marginTop: 10,
+        alignItems: 'center', 
       },
       placeholder: {
         borderRadius: 15,
