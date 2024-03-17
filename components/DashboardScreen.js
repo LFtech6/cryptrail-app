@@ -49,7 +49,7 @@ const DashScreen = ({ navigation }) => {
   
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <View>
         <Animated.View style={[
           styles.menu,
           {

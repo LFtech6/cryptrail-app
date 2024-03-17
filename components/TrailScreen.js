@@ -7,7 +7,7 @@ const TrailScreen = ({ navigation }) => {
   return (
     <View>
     <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-    <Image source={require('../assets/me2.png')} style={styles.user}/>
+    <Image source={require('../assets/profile.png')} style={styles.user}/>
     </TouchableOpacity>
     <Text style={styles.title}>Trail</Text>
     <Text style={styles.Seperator}/>

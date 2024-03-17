@@ -13,13 +13,13 @@ const SignupScreen = ({ navigation }) => {
   const sendToReg = async () => {
     console.log('sending request');
     try {
-      const response = await axios.post('http://192.168.1.86:3000/register', {
+      const response = await axios.post('http://192.168.1.86:62969/register', {
       username: name,
       email: email,
       password: password
     });    
   } catch (error) {
-    console.error('Error communicating with Register:', error);
+    console.error('Erro na comunicação com o registo:', error);
   }
 };
 
@@ -62,9 +62,9 @@ const validateForm = () => {
 }; 
 const handleSubmit = () => { 
   if (isFormValid) { 
-    console.log('Form submitted successfully!'); 
+    console.log('User Registado com sucesso!'); 
   } else { 
-    console.log('Form has errors. Please correct them.'); 
+    console.log('Errors detected.'); 
   } 
 }; 
 

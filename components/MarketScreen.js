@@ -1,63 +1,91 @@
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, FlatList } from 'react-native';
-import { responsiveWidth, responsiveScreenHeight, responsiveFontSize } from 'react-native-responsive-dimensions';
+import React, { useState, useEffect } from 'react';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
+import {
+  responsiveWidth,
+  responsiveScreenHeight,
+  responsiveFontSize,
+} from 'react-native-responsive-dimensions';
 
 const MarketScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('Coins');
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const tabs = ['Coins', 'Exchanges'];
+  useEffect(() => {
+    fetchDataFromApi(selectedTab);
+  }, [selectedTab]);
 
-  const generateMockData = (prefix, count) => {
-    return Array.from({ length: count }, (_, i) => ({
-      key: `${prefix}_${i + 1}`,
-      name: `${prefix} ${i + 1}`,
-    }));
-  };
-
-  const coinsData = generateMockData('Coin', 20);
-  const exchangesData = generateMockData('Exchange', 20);
-
-  const renderContent = () => {
-    switch (selectedTab) {
-      case 'Coins':
-        return <FlatList data={coinsData} renderItem={renderListItem} />;
-      case 'Exchanges':
-        return <FlatList data={exchangesData} renderItem={renderListItem} />;
+  const fetchDataFromApi = async (endpoint) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:51324/${endpoint}`);
+      const json = await response.json();
+      setData(json);
+    } catch (error) {
+      setError(`Failed to fetch ${endpoint}. Please try again later.`);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const renderListItem = ({ item }) => {
+  const renderCoinItem = ({ item }) => (
+    <View style={styles.listItem}>
+      <Image source={{ uri: item.image }} style={styles.coinImage} />
+      <Text style={styles.coinName}>{item.name}</Text>
+      <Text style={styles.coinPrice}>$ {item.current_price}</Text>
+      <Text style={styles.variation}>{item.price_change_percentage_24h?.toFixed(2)}%</Text>
+    </View>
+  );
+
+  const renderExchangeItem = ({ item }) => (
+    <View style={styles.listItem}>
+      <Image source={{ uri: item.image }} style={styles.exchangeImage} />
+      <Text style={styles.exchangeName}>{item.name}</Text>
+    </View>
+  );
+
+  const renderContent = () => {
+    if (error) return <Text style={styles.errorText}>{error}</Text>;
+
     return (
-      <View style={styles.listItem}>
-        <Text style={styles.itemText}>{item.name}</Text>
-      </View>
+      <FlatList
+        data={data}
+        renderItem={selectedTab === 'Coins' ? renderCoinItem : renderExchangeItem}
+        keyExtractor={(item) => item.id.toString()}
+      />
     );
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-        <Image source={require('../assets/me2.png')} style={styles.user} />
+      <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        <Image source={require('../assets/profile.png')} style={styles.user} />
       </TouchableOpacity>
       <Text style={styles.title}>Market</Text>
-      <ScrollView
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabsContainer}
-      >
-        {tabs.map((tab) => (
+      <View style={styles.tabContainer}>
+        {['Coins', 'Exchanges'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[styles.tab, selectedTab === tab && styles.activeTab]}
-            onPress={() => setSelectedTab(tab)}
-          >
-            <Text style={[styles.tabText, selectedTab === tab && styles.activeTabText]}>{tab}</Text>
+            onPress={() => setSelectedTab(tab)}>
+            <Text style={[styles.tabText, selectedTab === tab && styles.activeTabText]}>
+              {tab}
+            </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
-      <View style={styles.contentContainer}>
-        {renderContent()}
       </View>
+      {renderContent()}
     </View>
   );
 };
@@ -65,7 +93,6 @@ const MarketScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   user: {
     height: responsiveScreenHeight(5),
@@ -74,40 +101,88 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   title: {
-    fontSize: responsiveFontSize(3.5),
+    fontSize: responsiveFontSize(3),
+    fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',
-    marginVertical: responsiveScreenHeight(2),
+    marginVertical: responsiveScreenHeight(1),
   },
-  tabsContainer: {
+  tabContainer: {
     flexDirection: 'row',
-},
+    justifyContent: 'center',
+    paddingVertical: responsiveScreenHeight(1),
+  },
   tab: {
-    paddingHorizontal: responsiveWidth(4),
-    marginHorizontal: responsiveWidth(1),
+    paddingHorizontal: responsiveWidth(5),
+    paddingVertical: responsiveScreenHeight(1),
+    marginHorizontal: responsiveWidth(2),
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'blue',
   },
   tabText: {
-    fontSize: responsiveFontSize(2),
+    fontSize: responsiveFontSize(2.2),
     color: '#aaa',
   },
   activeTabText: {
     color: '#000',
     fontWeight: 'bold',
   },
-  contentContainer: {
-    flex: 25,
-    marginBottom: 80,
-},
+  content: {
+    flex: 1,
+  },
   listItem: {
-    backgroundColor: '#fff',
-    padding: responsiveWidth(4),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: responsiveScreenHeight(2),
+    paddingHorizontal: responsiveWidth(4),
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  itemText: {
-    fontSize: responsiveFontSize(2),
+  coinImage: {
+    width: responsiveWidth(10),
+    height: responsiveWidth(10),
+    borderRadius: responsiveWidth(5),
+    marginRight: responsiveWidth(4),
+  },
+  coinName: {
+    flex: 1,
+    fontSize: responsiveFontSize(2.2),
+    fontWeight: 'bold',
     color: '#333',
   },
+  coinPrice: {
+    flex: 1,
+    fontSize: responsiveFontSize(2),
+    color: '#333',
+    marginRight: responsiveWidth(4),
+  },
+  variation: {
+    flex: 1,
+    fontSize: responsiveFontSize(2),
+    color: '#333',
+    marginRight: responsiveWidth(4),
+  },
+  errorText: {
+    fontSize: responsiveFontSize(2),
+    color: 'red',
+    textAlign: 'center',
+    marginTop: responsiveScreenHeight(2),
+  },
+  exchangeName: {
+    fontSize: responsiveFontSize(2),
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  exchangeImage: {
+    width: responsiveWidth(10),
+    height: responsiveWidth(10),
+    borderRadius: responsiveWidth(5),
+    marginRight: responsiveWidth(4),
+  },
+  // Add any other styles you may need for additional elements
 });
+
 
 export default MarketScreen;
