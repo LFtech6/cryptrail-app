@@ -1,6 +1,6 @@
 //HomeScreen
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View, Image, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
 import { FontAwesome } from '@expo/vector-icons';
 

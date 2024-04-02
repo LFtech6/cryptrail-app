@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  FlatList,
-  ActivityIndicator,
-} from 'react-native';
-import {
-  responsiveWidth,
-  responsiveScreenHeight,
-  responsiveFontSize,
-} from 'react-native-responsive-dimensions';
+import { Image, StyleSheet, Text, TouchableOpacity, View, FlatList, ScrollView } from 'react-native';
+import { responsiveWidth, responsiveScreenHeight, responsiveFontSize } from 'react-native-responsive-dimensions';
 
 const MarketScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('Coins');
@@ -28,10 +16,10 @@ const MarketScreen = ({ navigation }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:51324/${endpoint}`);
+      const response = await fetch(`http://localhost:54671/${endpoint}`);
       const json = await response.json();
       setData(json);
-    } catch (error) {
+    } catch (error) {r
       setError(`Failed to fetch ${endpoint}. Please try again later.`);
       console.error(error);
     } finally {
@@ -93,6 +81,7 @@ const MarketScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 80,
   },
   user: {
     height: responsiveScreenHeight(5),

@@ -12,8 +12,9 @@ import WatchlistScreen from "./components/WatchlistScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import DashboardScreen from "./components/DashboardScreen";
 import TrailScreen from "./components/TrailScreen";
-import NewsScreen from "./components/NewsScreen";
 import MarketScreen from "./components/MarketScreen";
+import NewsScreen from "./components/NewsScreen";
+import BuyPlacesScreen from "./components/BuyPlacesScreen";
 
 // Linking configuration using the Expo deep link for development
 const linking = {
@@ -30,6 +31,7 @@ const linking = {
       Trail: 'trail',
       Market: 'market',
       News: 'news',
+      BuyPlaces: 'buy places',
     },
   },
 };
@@ -131,10 +133,11 @@ export default function App() {
         <Stack.Screen name="Forgot" component={ForgotPasswordScreen} />
         <Stack.Screen name="Watchlist" component={WatchlistScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Dashboard0" component={ShowBottomTabs} />
-        <Stack.Screen name="Trail0" component={ShowBottomTabs} />
-        <Stack.Screen name="Market0" component={ShowBottomTabs} />
-        <Stack.Screen name="News0" component={ShowBottomTabs} />
+        <Stack.Screen name="Dashboard0" component={ShowBottomTabs} options={{gestureEnabled: false }} />
+        <Stack.Screen name="Trail0" component={ShowBottomTabs} options={{gestureEnabled: false }} />
+        <Stack.Screen name="Market0" component={ShowBottomTabs} options={{gestureEnabled: false }} />
+        <Stack.Screen name="News0" component={ShowBottomTabs} options={{gestureEnabled: false }}/>
+        <Stack.Screen name="BuyPlaces" component={BuyPlacesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
