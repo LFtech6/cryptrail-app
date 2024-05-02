@@ -1,259 +1,228 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  FlatList,
-  SafeAreaView,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
   Alert,
-  StatusBar
-} from 'react-native';
-import { responsiveWidth, responsiveHeight } from 'react-native-responsive-dimensions';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+  Image,
+  KeyboardAvoidingView,
+} from "react-native";
+import axios from "axios";
+import Icon from "react-native-vector-icons/FontAwesome"; // Ensure you have installed this package
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  responsiveWidth,
+  responsiveScreenHeight,
+  responsiveFontSize,
+} from "react-native-responsive-dimensions";
+import { useUser } from "../UserContext";
 
-const TrailScreen = ({ navigation }) => {
-  const [message, setMessage] = useState('');
+const TrailScreen = () => {
   const [messages, setMessages] = useState([]);
-  const [isSendingAllowed, setIsSendingAllowed] = useState(true);
-  
+  const [inputText, setInputText] = useState("");
+  const { user, setUser } = useUser();
+
   useEffect(() => {
-    loadMessages();
-    StatusBar.setBarStyle('light-content');
-  }, []);
-  
-  useEffect(() => {
-    let timer;
-    if (!isSendingAllowed) {
-      timer = setTimeout(() => {
-        setIsSendingAllowed(true);
-      }, 5000); // Set cooldown time to 5 seconds
+    if (user && user.userId) {
+      fetchMessages(user.userId);
     }
-    return () => timer && clearTimeout(timer);
-  }, [isSendingAllowed]);
-  
-  const saveMessages = async (newMessages) => {
+  }, [user]);
+
+  const fetchMessages = async (userId) => {
     try {
-      await AsyncStorage.setItem('messages', JSON.stringify(newMessages));
+      const response = await axios.get(
+        `http://10.0.35.193:3000/conversations/${userId}`
+      );
+      setMessages(response.data);
     } catch (error) {
-      console.error('Failed to save messages.', error);
+      console.error("Failed to fetch messages:", error);
     }
   };
-  
-  const loadMessages = async () => {
+
+  const sendMessage = async () => {
+    if (!inputText.trim()) return; // Don't send empty messages
+    const userMessage = { role: "user", content: inputText };
+
     try {
-      const savedMessages = await AsyncStorage.getItem('messages');
-      if (savedMessages) {
-        setMessages(JSON.parse(savedMessages));
-      }
+      const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-3.5-turbo",
+          messages: [userMessage],
+          temperature: 0.5,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer sk-proj-aVKnxkecomwLBFdWmrWgT3BlbkFJjfllx1tX46NeXj31Tx6t",
+          },
+        }
+      );
+
+      const botMessage = {
+        role: "bot",
+        content: response.data.choices[0].message.content,
+      };
+
+      const updatedMessages = [...messages, userMessage, botMessage];
+      setMessages(updatedMessages);
+      await axios.post(`http://10.0.35.193:3000/saveConversation`, {
+        userId: user.userId,
+        content: updatedMessages,
+      });
     } catch (error) {
-      console.error('Failed to load messages.', error);
+      console.error("Error sending message:", error);
     }
   };
-  
-  const handleSendMessage = async () => {
-    if (!message.trim() || !isSendingAllowed) return;
-    
-    const userMessage = {
-      id: Date.now(),
-      text: message.trim(),
-      sender: 'user',
-    };
-    
-    setMessage('');
-    setIsSendingAllowed(false);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // Set timeout to 10 seconds
-    
-    try {
-      const response = await fetch('http://148.69.4.99:4000/send-message', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage.text }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-  } catch (error) {
-    console.error('Error sending message:', error);
-  }
-  
-  setIsSendingAllowed(true);
-};
 
-
-const clearMessages = async () => {
-  try {
-    await AsyncStorage.removeItem('messages');
-    setMessages([]);
-  } catch (error) {
-    console.error('Failed to clear messages.', error);
-  }
-};
-
-const handleClearPress = () => {
-  Alert.alert(
-    "Clear Messages",
-    "Are you sure you want to delete all messages?",
-    [
-      { text: "Cancel", style: "cancel" },
-      { text: "Yes", onPress: clearMessages }
-    ]
+  const clearMessages = async () => {
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete all messages?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Deletion cancelled."),
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: async () => {
+            try {
+              await axios.delete(
+                `http://10.0.35.193:3000/conversations/${user.userId}`
+              );
+              setMessages([]);
+            } catch (error) {
+              console.error("Error clearing messages:", error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
     );
   };
-  
-  
+
+  const clearInput = () => {
+    setInputText("");
+  };
+
+  const Seperator = () => <View style={styles.seperator} />;
+
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-    <SafeAreaView style={styles.innerContainer}>
-    <TouchableOpacity onPress={() => navigation.navigate("Profile")} style={styles.profileButton}>
-    <Image source={require('../assets/profile.png')} style={styles.user}/>
-    </TouchableOpacity>
-    
-    <Text style={styles.title}>Trail</Text>
-    <View style={styles.separator}/>
-    
-    <FlatList
-    style={styles.flatList}
-    data={messages}
-    keyExtractor={(item) => item.id.toString()}
-    renderItem={({ item }) => (
-      <View style={[styles.message, item.sender === 'bot' ? styles.botMessage : styles.userMessage]}>
-      <Text style={[styles.messageText, item.sender === 'bot' ? styles.botMessageText : styles.userMessageText]}>{item.text}</Text>
+    <View style={styles.container}>
+      <View style={{ flexDirection: 'row'}}>
+      <Image source={require('../assets/adaptive-icon.png')} style={styles.logo} />
+      <Text style={styles.title}>Trail</Text>
       </View>
-      )}
-      inverted
-      />
-      
-      <View style={styles.send}>
-      <TextInput 
-      placeholder='Message' 
-      style={styles.input} 
-      value={message} 
-      onChangeText={setMessage} 
-      onSubmitEditing={handleSendMessage}
-      editable={isSendingAllowed}
-      placeholderTextColor="#666"
-      />
-      <TouchableOpacity onPress={handleSendMessage} disabled={!isSendingAllowed} style={styles.sendButton}>
-      <Image source={require('../assets/seta.png')} style={styles.sent} />
+      <Seperator />
+      <ScrollView style={styles.messageContainer}>
+        {messages.map((message, index) => (
+          <View
+            key={index}
+            style={[
+              styles.messageBubble,
+              message.role === "user" ? styles.userMessage : styles.botMessage,
+            ]}
+          >
+            <Text style={styles.messageText}>{message.content}</Text>
+          </View>
+        ))}
+      </ScrollView>
+      <TouchableOpacity
+        onPress={clearMessages}
+        style={styles.clearMessagesButton}
+      >
+        <Text>Clear Messages</Text>
       </TouchableOpacity>
-      </View>
-      {!isSendingAllowed && <Text style={styles.cooldownText}>Wait for 5 seconds...</Text>}
-      <TouchableOpacity onPress={handleClearPress} style={styles.clearButton}>
-      <Text style={styles.clearButtonText}>Clear Messages</Text>
-      </TouchableOpacity>
-      </SafeAreaView>
+      <KeyboardAvoidingView behavior="padding">
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            onChangeText={setInputText}
+            value={inputText}
+            placeholder="Write your message..."
+          />
+          <TouchableOpacity onPress={clearInput} style={styles.clearButton}>
+            <Icon name="times-circle" size={24} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+            <Icon name="paper-plane" size={24} />
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
-      );
-    };
-    
-    const styles = StyleSheet.create({
-      container: {
-        flex: 1,
-        marginBottom: 80,
-      },
-      innerContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: responsiveHeight(2),
-        marginBottom: responsiveHeight(2),
-      },
-      profileButton: {
-        marginTop: responsiveHeight(5),
-        alignSelf: 'flex-end',
-        marginRight: 20,
-      },
-      user: {
-        height: responsiveHeight(5),
-        width: responsiveWidth(10),
-        resizeMode: 'contain',
-      },
-      title: {
-        fontSize: 35,
-        marginTop: responsiveHeight(2),
-      },
-      separator: {
-        height: 1,
-        width: '90%',
-        backgroundColor: '#FFD464',
-        marginVertical: responsiveHeight(2),
-      },
-      flatList: {
-        width: '140%',
-        paddingHorizontal: 5,
-        marginBottom: responsiveHeight(3),
-      },
-      message: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 20,
-        marginVertical: 5,
-        minWidth: '10%',
-        maxWidth: '40%',
-        marginBottom: 10,
-      },
-      messageText: {
-        fontSize: 16,
-      },
-      botMessage: {
-        backgroundColor: '#333',
-        marginLeft: 100,
-        paddingHorizontal: 20,
-      },
-      botMessageText: {
-        color: 'white',
-      },
-      userMessage: {
-        backgroundColor: '#FFD464',
-        alignSelf: 'flex-end',
-        marginHorizontal: 100,
-      },
-      userMessageText: {
-        color: 'black',
-      },
-      send: {
-        flexDirection: 'row',
-        borderWidth: 1,
-        borderColor: '#FFD464',
-        borderRadius: 25,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        width: '90%',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#FFF',
-      },
-      input: {
-        flex: 1,
-        marginRight: 10,
-        color: '#333',
-      },
-      sent: {
-        height: responsiveHeight(3),
-        width: responsiveWidth(6),
-      },
-      cooldownText: {
-        color: '#FFD464',
-        textAlign: 'center',
-      },
-      clearButton: {
-        position: 'absolute',
-        right: 20,
-        bottom: responsiveHeight(5),
-        padding: 10,
-        backgroundColor: '#FFD464',
-        borderRadius: 20,
-      },
-      clearButtonText: {
-        color: '#333',
-      },
-    });
-    
-    export default TrailScreen;
-    
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  Seperator: {
+    height: 1,
+    backgroundColor: '#FFD464',
+    width: '100%',
+    marginVertical: 8,
+  },
+  container: {
+    flex: 1,
+    marginBottom: 80,
+    padding: 10,
+  },
+  logo: { 
+    width: responsiveWidth(9),
+    height: responsiveWidth(9),
+    marginTop: responsiveScreenHeight(5),
+  },
+  title: {
+    fontSize: responsiveFontSize(2.3),
+    fontWeight: 'bold',
+    color: '#000',
+    paddingHorizontal: responsiveWidth(0.3),
+    marginTop: responsiveScreenHeight(5.8),
+  },
+  messageContainer: {
+    flex: 1,
+    padding: 10,
+  },
+  messageBubble: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    marginVertical: 5,
+  },
+  userMessage: {
+    backgroundColor: "#1a73e8",
+    alignSelf: "flex-end",
+  },
+  botMessage: {
+    backgroundColor: "#e0f0e0",
+    alignSelf: "flex-start",
+  },
+  messageText: {
+    color: "#000",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 10,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 50,
+    marginRight: 10,
+  },
+  clearButton: {
+    padding: 10,
+  },
+  sendButton: {
+    padding: 10,
+  },
+});
+
+export default TrailScreen;

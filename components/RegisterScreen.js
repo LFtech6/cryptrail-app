@@ -1,10 +1,10 @@
 //RegisterScreen
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, TextInput, TouchableWithoutFeedback, Image, Keyboard, KeyboardAvoidingView} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, TextInput, TouchableWithoutFeedback, Image, Keyboard, KeyboardAvoidingView, SafeAreaView} from 'react-native';
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignupScreen = ({ navigation }) => {
   
@@ -13,11 +13,14 @@ const SignupScreen = ({ navigation }) => {
   const sendToReg = async () => {
     console.log('sending request');
     try {
-      const response = await axios.post('http://192.168.1.86:62969/register', {
+      const response = await axios.post('http://10.0.35.193:3000/register', {
       username: name,
       email: email,
       password: password
     });    
+    AsyncStorage.setItem('userId', JSON.stringify(response.data.userId));
+    AsyncStorage.setItem('username', name);
+    navigation.navigate("Dashboard0");
   } catch (error) {
     console.error('Erro na comunicação com o registo:', error);
   }

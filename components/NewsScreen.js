@@ -1,22 +1,71 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, TouchableOpacity, Linking,} from 'react-native';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+  Linking,
+  SafeAreaView,
+  Animated,
+  ActivityIndicator,
+} from "react-native";
+import {
+  responsiveWidth,
+  responsiveFontSize,
+  responsiveScreenHeight,
+} from "react-native-responsive-dimensions";
+import axios from "axios";
 
 const NewsScreen = ({ navigation }) => {
   const [newsArticles, setNewsArticles] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const menuAnimation = useRef(new Animated.Value(responsiveWidth(75))).current;
+  const contentAnimation = useRef(new Animated.Value(0)).current;
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout Confirmation",
+      "Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          onPress: () => {
+            navigation.navigate("Landing");
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/news');
+      const response = await axios.get("http://10.0.35.193:3000/news");
       setNewsArticles(response.data || []);
     } catch (error) {
-      console.error('Error fetching news:', error);
+      console.error("Error fetching news:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const openLink = async (url) => {
+    if (await Linking.canOpenURL(url)) {
+      await Linking.openURL(url);
+    } else {
+      console.error(`Don't know how to open this URL: ${url}`);
     }
   };
 
@@ -24,40 +73,65 @@ const NewsScreen = ({ navigation }) => {
     fetchNews();
   }, []);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchNews();
-  }, []);
+  const toggleMenu = () => {
+    Animated.parallel([
+      Animated.timing(menuAnimation, {
+        toValue: menuVisible ? responsiveWidth(75) : 0, // Slide in menu or slide out
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(contentAnimation, {
+        toValue: menuVisible ? 0 : -responsiveWidth(75), // Shift content left or back to original position
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-  const openLink = (url) => {
-    Linking.openURL(url).catch((err) => console.error('An error occurred', err));
+    setMenuVisible(!menuVisible);
   };
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#000000" style={styles.loading} />
+        <ActivityIndicator size="large" color="#000000" />
       </View>
     );
   }
 
+  const Seperator = () => <View style={styles.Seperator} />;
+
   return (
     <View style={styles.container}>
+      <View style={{ flexDirection: "row" }}>
+        <Image
+          source={require("../assets/adaptive-icon.png")}
+          style={styles.logo}
+        />
+        <Text style={styles.title}>News</Text>
+      </View>
+      <Seperator />
       <ScrollView
         style={styles.newsScroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => {}} />
+        }
       >
         {newsArticles.map((article, index) => (
           <TouchableOpacity
             key={index}
-            style={index === 0 ? styles.featuredArticle : styles.article}
             onPress={() => openLink(article.link)}
+            style={index === 0 ? styles.featuredArticle : styles.article}
           >
             <Image
-              source={{ uri: article.image_url || 'https://via.placeholder.com/120' }}
+              source={{
+                uri: article.image_url || "https://via.placeholder.com/120",
+              }}
               style={index === 0 ? styles.featuredImage : styles.articleImage}
             />
-            <Text style={index === 0 ? styles.featuredTitle : styles.articleTitle}>
+            <Text
+              style={index === 0 ? styles.featuredTitle : styles.articleTitle}
+            >
               {article.title}
             </Text>
           </TouchableOpacity>
@@ -67,53 +141,69 @@ const NewsScreen = ({ navigation }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
-    marginTop: 130,
-    marginBottom: 80,
+    marginBottom: 40,
+    padding: 10,
   },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  logo: {
+    width: responsiveWidth(9),
+    height: responsiveWidth(9),
+    marginTop: responsiveScreenHeight(5),
+  },
+  title: {
+    fontSize: responsiveFontSize(2.3),
+    fontWeight: "bold",
+    color: "#000",
+    paddingHorizontal: responsiveWidth(0.3),
+    marginTop: responsiveScreenHeight(5.8),
+  },
+  Seperator: {
+    height: 1,
+    backgroundColor: "#FFD464",
+    width: "100%",
+    marginVertical: 8,
   },
   newsScroll: {
-    flex: 1,
+    paddingTop: 20,
+    marginTop: 20,
+    marginBottom: 60,
+  },
+  contentContainer: {
+    paddingBottom: 30,
   },
   featuredArticle: {
     marginHorizontal: 10,
     marginTop: 10,
     borderRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: 'white',
+    overflow: "hidden",
+    backgroundColor: "white",
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
   },
   article: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     padding: 10,
     marginHorizontal: 10,
     marginTop: 5,
     borderRadius: 10,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   featuredImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   articleImage: {
     width: 80,
@@ -122,14 +212,14 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   featuredTitle: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 24,
     padding: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   articleTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     flex: 1,
   },
 });

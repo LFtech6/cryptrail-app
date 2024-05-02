@@ -1,224 +1,389 @@
-// DashboardScreen.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  SafeAreaView,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+  Animated,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
+} from "react-native";
+import {
+  responsiveWidth,
+  responsiveFontSize,
+  responsiveScreenHeight,
+} from "react-native-responsive-dimensions";
+import { useUser } from "../UserContext";
 
 const Dashboard = ({ navigation }) => {
   const [rates, setRates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [inputValue, setInputValue] = useState("1");
-  const [baseCurrency, setBaseCurrency] = useState('eur');
-  const [targetCurrency, setTargetCurrency] = useState('btc');
+  const [baseCurrency, setBaseCurrency] = useState("eur");
+  const [targetCurrency, setTargetCurrency] = useState("btc");
   const [result, setResult] = useState("");
-  const [conversionType, setConversionType] = useState('cryptoToFiat', 'fiatToCrypto');
+  const [menuVisible, setMenuVisible] = useState(false);
+  const menuAnimation = useRef(new Animated.Value(responsiveWidth(75))).current;
+  const contentAnimation = useRef(new Animated.Value(0)).current;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCurrencyType, setSelectedCurrencyType] = useState("");
+  const { user, setUser } = useUser();
 
-  useEffect(() => {
-    const backendPort = '57288';
-    fetchData(backendPort);
-  }, [conversionType]);
+  console.log(
+    `Converting ${inputValue} from ${baseCurrency} to ${targetCurrency}`
+  );
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('http://localhost:62998/convert');
-      if (!response.ok) {
-        const text = await response.text(); // Gets the response body as text
-        throw new Error(`Server responded with ${response.status}: ${text}`);
-      }
-      const jsonData = await response.json();
-      if (jsonData) {
-        setRates(jsonData);
-      } else {
-        throw new Error('Rates data is not available');
-      }
-    } catch (error) {
-      console.error("Fetch error: ", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const swapCurrencies = () => {
+    setBaseCurrency((prevBase) => {
+      setTargetCurrency(prevBase);
+      return targetCurrency;
+    });
   };
-  
 
   useEffect(() => {
-    if (!isLoading && rates && baseCurrency && targetCurrency) {
-      convertCurrency();
+    const fetchInitialRates = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://10.0.35.193:3000/rates");
+        const jsonData = await response.json();
+        setRates(jsonData);
+      } catch (error) {
+        console.error("Fetch error: ", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialRates();
+  }, []);
+
+  const toggleMenu = () => {
+    Animated.parallel([
+      Animated.timing(menuAnimation, {
+        toValue: menuVisible ? responsiveWidth(75) : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(contentAnimation, {
+        toValue: menuVisible ? 0 : -responsiveWidth(75),
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    setMenuVisible(!menuVisible);
+  };
+
+  const showCurrencyOptions = (type) => {
+    setSelectedCurrencyType(type);
+    setModalVisible(true);
+  };
+  const selectCurrency = (currency) => {
+    if (selectedCurrencyType === "base") {
+      setBaseCurrency(currency);
+    } else {
+      setTargetCurrency(currency);
     }
-  }, [inputValue, baseCurrency, targetCurrency, rates]);
+    setModalVisible(false);
+  };
 
   const convertCurrency = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:62998/convert?base=${baseCurrency}&target=${targetCurrency}&amount=${inputValue}`);
-      if (!response.ok) {
-        const text = await response.text(); // Gets the response body as text
-        throw new Error(`Server responded with ${response.status}: ${text}`);
-      }
+      const query = `base=${baseCurrency}&target=${targetCurrency}&amount=${inputValue}`;
+      const response = await fetch(`http://10.0.35.193:3000/convert?${query}`);
       const data = await response.json();
-      if (data.result) {
-        setResult(data.result);
+      console.log(`http://10.0.35.193:3000/convert?${query}`);
+      console.log(data);
+
+      if (data.convertedAmount) {
+        setResult(data.convertedAmount);
       } else {
-        setResult("Conversion error");
+        setResult("Unavailable");
+        Alert.alert(
+          "Conversion Error",
+          "Unable to convert currency. Please try again later."
+        );
       }
     } catch (error) {
       console.error("Conversion error: ", error);
       setResult("Unavailable");
+      Alert.alert(
+        "Conversion Error",
+        "An error occurred during currency conversion."
+      );
     } finally {
       setIsLoading(false);
     }
   };
-  
 
+  useEffect(() => {
+    if (!isLoading && rates && baseCurrency && targetCurrency && inputValue) {
+      convertCurrency();
+    }
+  }, [inputValue, baseCurrency, targetCurrency, rates]);
 
-  const getFilteredRates = (type) => {
-    return Object.entries(rates)
-      .filter(([_, value]) => value.type === type)
-      .map(([key, value]) => (
-        <Picker.Item key={key} label={value.name} value={key} />
-      ));
-  };
+  const Seperator = () => <View style={styles.Seperator} />;
 
-  const fiatCurrencyOptions = getFilteredRates('fiat');
-  const cryptoCurrencyOptions = getFilteredRates('crypto');
-
-  const handleSegmentChange = (index) => {
-    const types = ['cryptoToFiat', 'fiatToCrypto'];
-    setConversionType(types[index]);
-    setBaseCurrency('eur');
-    setTargetCurrency('btc');
-  };
-
-  
   return (
-    <ScrollView style={styles.page}>
-    <Text style={styles.title}>Dashboard</Text>
     <View style={styles.container}>
-
-      <SegmentedControl
-        values={['Fiat to Crypto', 'Crypto to Fiat']}
-        selectedIndex={0}
-        onChange={(event) => handleSegmentChange(event.nativeEvent.selectedSegmentIndex)}
-      />
-      
-      <TextInput
-        style={styles.input}
-        onChangeText={setInputValue}
-        value={inputValue}
-        keyboardType="numeric"
-        placeholder="Enter amount"
-      />
-
-      <Text style={styles.label}>From:</Text>
-      <Picker
-        selectedValue={targetCurrency}
-        style={styles.picker}
-        onValueChange={setTargetCurrency}
+      <View style={{ flexDirection: "row" }}>
+        <Image
+          source={require("../assets/adaptive-icon.png")}
+          style={styles.logo}
+        />
+        <Text style={styles.title}>Dashboard</Text>
+      </View>
+      <Seperator />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {(conversionType === 'cryptoToFiat') ? cryptoCurrencyOptions : fiatCurrencyOptions}
-      </Picker>
+        <View style={styles.view}>
+          <Text style={styles.welcome}>
+            Welcome, {user ? user.username : "Guest"}!
+          </Text>
+          <View style={styles.inpuT}>
+            <Text style={styles.inputTitle}>
+              Write the value you want to Convert
+            </Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={setInputValue}
+              value={inputValue}
+              keyboardType="numeric"
+              placeholder="Enter amount"
+            />
+          </View>
+          <View style={styles.dropCont}>
+            <TouchableOpacity
+              style={styles.dropdownF}
+              onPress={() => showCurrencyOptions("base")}
+            >
+              <Text style={styles.dropText}>
+                {rates[baseCurrency]?.name || "FIAT"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={swapCurrencies}>
+              <Image
+                source={require("../assets/convert.png")}
+                style={styles.change}
+              ></Image>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownC}
+              onPress={() => showCurrencyOptions("target")}
+            >
+              <Text style={styles.dropText}>
+                {rates[targetCurrency]?.name || "CRYPTO"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <Text
+              style={styles.resultText}
+            >{`${inputValue} ${baseCurrency.toUpperCase()} is approximately ${result} ${targetCurrency.toUpperCase()}`}</Text>
+          )}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.navigate("BuyPlaces", {
+                amountInCrypto: result,
+                cryptoCurrency: targetCurrency,
+              })
+            }
+          >
+            <Text style={styles.buttonText}>Buy</Text>
+          </TouchableOpacity>
+        </View>
 
-      <Text style={styles.label}>To:</Text>
-      <Picker
-        selectedValue={baseCurrency}
-        style={styles.picker}
-        onValueChange={setBaseCurrency}
-      >
-        {(conversionType === 'fiatToCrypto') ? cryptoCurrencyOptions: fiatCurrencyOptions}
-      </Picker>
-
-      <Text style={styles.result}>
-        {inputValue} {rates[targetCurrency]?.unit} is approximately {result} {rates[baseCurrency]?.unit}
-      </Text>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('BuyPlaces', { amountInCrypto: result, amountcryptoCurrency: targetCurrency})}>
-          <Text style={styles.buttonText}>Buy</Text>
-        </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(!modalVisible)}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <FlatList
+                data={Object.entries(rates)}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    key={item[0]}
+                    style={styles.optionItem}
+                    onPress={() => selectCurrency(item[0])}
+                  >
+                    <Text style={styles.optionText}>{item[1].name}</Text>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item[0]}
+              />
+            </View>
+          </View>
+        </Modal>
+      </KeyboardAvoidingView>
     </View>
-    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-    page: { 
-      marginTop: 20,
-      marginBottom: 80,
+  container: {
+    flex: 1,
+    marginBottom: 80,
+    padding: 10,
+  },
+  logo: {
+    width: responsiveWidth(9),
+    height: responsiveWidth(9),
+    marginTop: responsiveScreenHeight(5),
+  },
+  title: {
+    fontSize: responsiveFontSize(2.3),
+    fontWeight: "bold",
+    color: "#000",
+    paddingHorizontal: responsiveWidth(0.3),
+    marginTop: responsiveScreenHeight(5.8),
+  },
+  Seperator: {
+    height: 1,
+    backgroundColor: "#FFD464",
+    width: "100%",
+    marginVertical: 8,
+  },
+  imageStyle: {
+    width: 30,
+    height: 30,
+  },
+  view: {
+    marginTop: 60,
+  },
+  welcome: {
+    fontSize: responsiveFontSize(2),
+    fontWeight: "bold",
+    margin: 12,
+    marginTop: -20,
+  },
+  inpuT: {
+    alignItems: "center",
+    marginTop: 30,
+    marginBottom: 40,
+  },
+  inputTitle: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 10,
+    fontWeight: "bold",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 10,
+    fontSize: responsiveFontSize(2),
+    marginBottom: 20,
+    width: 150,
+    alignSelf: "center",
+    paddingHorizontal: 20,
+    textAlign: "center",
+  },
+  dropCont: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  dropdownF: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    backgroundColor: "#ffffff",
+    borderRadius: 63,
+    paddingVertical: 30,
+    padding: 5,
+    width: 100,
+    alignSelf: "flex-start",
+    marginHorizontal: 50,
+  },
+  dropdownC: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    backgroundColor: "#ffffff",
+    borderRadius: 63,
+    paddingVertical: 30,
+    padding: 5,
+    width: 100,
+    alignSelf: "flex-end",
+    marginHorizontal: 50,
+  },
+  dropText: {
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 14,
+  },
+  change: {
+    width: 30,
+    height: 30,
+    marginTop: 25,
+  },
+  button: {
+    backgroundColor: "#007bff", // A bright blue for the main action button
+    borderRadius: 8,
+    padding: 12,
+    alignItems: "center",
+    marginTop: 20,
+    width: 100,
+    alignSelf: "center",
+  },
+  resultText: {
+    fontSize: responsiveFontSize(1.7),
+    color: "#333333",
+    textAlign: "center",
+    marginVertical: 20,
+    marginTop: 120,
+  },
+  buttonText: {
+    fontSize: responsiveFontSize(1.7),
+    color: "#ffffff", // White text on the button for contrast
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    title: {
-      borderColor: '#C7C7CC',
-      fontSize: 24,
-      textAlign: 'center',
-      color: '#1C1C1E',
-      padding: 15,
-      marginTop: 20,
-      backgroundColor: '#F5F5F7', 
-    },  
-    container: {
-      flex: 1,
-      backgroundColor: '#F5F5F7', 
-      padding: 20,
-      paddingTop: 70,
-    },
-    input: {
-      width: '100%',
-      padding: 15,
-      fontSize: 18,
-      borderColor: '#C7C7CC', 
-      borderWidth: 1,
-      borderRadius: 10,
-      backgroundColor: '#FFFFFF', 
-      marginBottom: 20,
-      color: '#1C1C1E', 
-      marginTop: 20,
-    },
-    picker: {
-      width: '100%',
-      padding: 15,
-      borderColor: '#C7C7CC',
-      borderWidth: 1,
-      borderRadius: 10,
-      marginBottom: 20,
-      color: '#1C1C1E',
-    },
-    label: {
-      alignSelf: 'flex-start',
-      fontSize: 16,
-      color: '#1C1C1E',
-      marginBottom: 5,
-    },
-    result: {
-      fontSize: 18,
-      color: '#1C1C1E',
-      padding: 15,
-      width: '100%',
-      textAlign: 'center',
-      borderColor: '#C7C7CC',
-      borderWidth: 1,
-      borderRadius: 10,
-      backgroundColor: '#FFFFFF',
-      marginBottom: 20,
-    },
-    button: {
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 10,
-      backgroundColor: '#007AFF', 
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 10,
-      marginBottom: 20,
-    },
-    buttonText: {
-      fontSize: 18,
-      color: '#FFFFFF', 
-      fontWeight: '600',
-    },
-    segmentedControl: {
-      width: '100%',
-      height: 35,
-      marginBottom: 20,
-    },
-  });
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  optionItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#cccccc",
+  },
+  optionText: {
+    fontSize: responsiveFontSize(2),
+    color: "#333333",
+  },
+});
 
 export default Dashboard;

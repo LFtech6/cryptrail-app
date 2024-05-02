@@ -1,84 +1,81 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
+import axios from 'axios';
 
-const App = ({ navigation, route }) => {
-  const { amountInCrypto, cryptoCurrency } = route.params;
-  const [platforms, setPlatforms] = useState([]);
+const BuyPlacesPage = ({ route }) => {
+  const { cryptoCurrency } = route.params;
+  const [exchanges, setExchanges] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching data from an API
-    const fetchPlatforms = async () => {
+    const fetchExchanges = async () => {
       setIsLoading(true);
-      // Simulate network request
-      setTimeout(() => {
-        const data = {
-          "platforms": [
-            { "id": "1", "name": "Platform A", "feePercentage": 1.5, "url": "https://platforma.com" },
-            { "id": "2", "name": "Platform B", "feePercentage": 1.0, "url": "https://platformb.com" },
-            { "id": "3", "name": "Platform C", "feePercentage": 0.75, "url": "https://platformc.com" }
-          ]
-        };
-        setPlatforms(data.platforms);
+      try {
+        const response = await axios.get(`http://10.0.35.193:3000/exchanges?currency=${cryptoCurrency}`);
+        console.log('Fetched exchanges:', response.data);
+        if (response.data.length > 0) {
+          setExchanges(response.data);
+        } else {
+          setExchanges([]);
+        }
         setIsLoading(false);
-      }, 1000);
+      } catch (error) {
+        console.error('Error fetching exchanges for currency:', cryptoCurrency, error);
+        setIsLoading(false);
+      }
     };
 
-    fetchPlatforms();
-  }, []);
+    fetchExchanges();
+  }, [cryptoCurrency]);
 
-  const renderItem = ({ item }) => {
-    const finalAmount = amountInCrypto - (amountInCrypto * item.feePercentage / 100);
-    return (
-      <View style={styles.itemContainer}>
-        <Text style={styles.itemText}>{item.name} - Fee: {item.feePercentage}%</Text>
-        <Text style={styles.itemText}>You get: {finalAmount.toFixed(6)} {cryptoCurrency}</Text>
-        <TouchableOpacity style={styles.buyButton} onPress={() => navigation.navigate('WebView', { url: item.url })}>
-          <Text style={styles.buyButtonText}>Buy on {item.name}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
+  if (isLoading) {
+    return <ActivityIndicator size="large" />;
+  }
 
   return (
-    <View style={styles.container}>
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Buy {}{cryptoCurrency.toUpperCase()}</Text>
+      {exchanges.length ? (
+        exchanges.map((exchange) => (
+          <View key={exchange.id} style={styles.exchangeContainer}>
+            <Text style={styles.exchangeName}>{exchange.name}</Text>
+            <TouchableOpacity onPress={() => Linking.openURL(exchange.url)}>
+              <Text style={styles.link}>Go to {exchange.name}</Text>
+            </TouchableOpacity>
+          </View>
+        ))
       ) : (
-        <FlatList
-          data={platforms}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-        />
+        <Text style={styles.noExchanges}>No exchanges available for {cryptoCurrency.toUpperCase()}</Text>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  itemContainer: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  itemText: {
-    fontSize: 16,
-  },
-  buyButton: {
-    backgroundColor: '#007AFF',
     padding: 10,
-    marginTop: 10,
-    borderRadius: 5,
+    marginTop: 40,
   },
-  buyButtonText: {
-    color: '#fff',
-    textAlign: 'center',
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  exchangeContainer: {
+    marginBottom: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  exchangeName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  link: {
+    color: 'blue',
+    marginTop: 5,
   },
 });
 
-export default App;
+export default BuyPlacesPage;
