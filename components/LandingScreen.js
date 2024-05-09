@@ -2,7 +2,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
-import { FontAwesome } from '@expo/vector-icons';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -22,8 +21,8 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonBox} onPress={() => navigation.navigate("Dashboard0")}>
-          <FontAwesome name="apple" style={styles.icon}/>
+        <TouchableOpacity style={styles.buttonBox}>
+        <Image source={require('../assets/apple.png')} style={styles.glogo} />
           <Text style={styles.buttonText}>Continue with Apple </Text>
         </TouchableOpacity>
 
@@ -128,4 +127,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
-

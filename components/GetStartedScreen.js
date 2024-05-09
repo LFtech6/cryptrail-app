@@ -111,8 +111,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, // Add horizontal padding
   },
   next: {
-    width: 27,
-    height: 27,
+    width: 22,
+    height: 22,
+    marginTop: 2,
     alignSelf: "flex-end",
   },
   nextT: {

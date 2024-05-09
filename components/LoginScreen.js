@@ -1,4 +1,3 @@
-//LoginScreen
 import React, { useState, useEffect } from "react";
 import {
   Alert,
@@ -13,6 +12,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   responsiveFontSize,
@@ -28,15 +28,24 @@ const SigninScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { setUser } = useUser(); // Use the user context to set user data
+  const [isClicked, setIsClicked] = useState(false);
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://10.0.35.193:3000/login", {
+      const response = await axios.post("http://192.168.1.70:3000/login", {
         email,
         password,
       });
       if (response.data.user) {
-        setUser(response.data.user); // Assuming setUser is updating the context
+        const userData = response.data.user;
+
+        // Store user details and password in AsyncStorage
+        await AsyncStorage.setItem("userId", JSON.stringify(userData.id));
+        await AsyncStorage.setItem("username", userData.username);
+        await AsyncStorage.setItem("email", userData.email);
+        await AsyncStorage.setItem("password", password); // Store the plain password
+
+        setUser(userData); // Update the user context
         navigation.navigate("Dashboard0");
       }
     } catch (error) {
@@ -63,7 +72,6 @@ const SigninScreen = ({ navigation }) => {
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       errors.email = "Email is invalid.";
     }
-    //missing database connection for login
 
     // Validate password field
     if (!password) {
@@ -76,6 +84,7 @@ const SigninScreen = ({ navigation }) => {
     setErrors(errors);
     setIsFormValid(Object.keys(errors).length === 0);
   };
+
   const handleSubmit = () => {
     if (isFormValid) {
       console.log("Form submitted successfully!");
@@ -89,9 +98,9 @@ const SigninScreen = ({ navigation }) => {
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
+    setIsClicked((prevState) => !prevState);
   };
 
-  //page
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -118,13 +127,21 @@ const SigninScreen = ({ navigation }) => {
               placeholder="Password"
               placeholderTextColor="#aaa"
             />
-            <MaterialCommunityIcons
-              style={styles.icon}
-              name={showPassword ? "eye-off" : "eye"}
+            <TouchableOpacity
+              name={showPassword}
               size={24}
               color="#aaa"
               onPress={toggleShowPassword}
-            />
+            >
+              <Image
+                style={styles.icon}
+                source={
+                  isClicked
+                    ? require("../assets/hide.png")
+                    : require("../assets/view.png")
+                }
+              />
+            </TouchableOpacity>
             <View style={styles.button}>
               <TouchableOpacity
                 style={[styles.buttonBox, { opacity: isFormValid ? 1 : 0.5 }]}
@@ -191,7 +208,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#B3B3B3",
   },
   icon: {
-    textAlign: "center",
+    alignSelf: "center",
+    width: 24,
+    height: 24,
   },
   write: {
     alignItems: "center",

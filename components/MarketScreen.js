@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Image,
   StyleSheet,
@@ -9,13 +9,18 @@ import {
   Linking,
   TextInput,
   Modal,
+  TouchableWithoutFeedback,
+  Alert,
+  Keyboard,
   KeyboardAvoidingView,
+  Animated,
 } from "react-native";
 import {
   responsiveWidth,
   responsiveScreenHeight,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
+import { useUser } from "../UserContext";
 
 const MarketScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState("Coins");
@@ -27,6 +32,10 @@ const MarketScreen = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [items, setItems] = useState([]); // Your items here
   const [filteredItems, setFilteredItems] = useState([]);
+  const [isMenuVisible, setMenuVisible] = useState(false);
+  const menuAnimation = useRef(new Animated.Value(300)).current; // Assuming menu width is 300
+  const contentAnimation = useRef(new Animated.Value(0)).current;
+  const { user, setUser } = useUser();
 
   const handleSearch = (text) => {
     setSearchTerm(text);
@@ -41,6 +50,22 @@ const MarketScreen = ({ navigation }) => {
     }
   };
 
+  const toggleMenu = () => {
+    Animated.timing(menuAnimation, {
+      toValue: isMenuVisible ? 300 : 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  
+    Animated.timing(contentAnimation, {
+      toValue: isMenuVisible ? 0 : -300,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  
+    setMenuVisible(!isMenuVisible);
+  };
+
   useEffect(() => {
     fetchDataFromApi(selectedTab);
   }, [selectedTab]);
@@ -49,7 +74,7 @@ const MarketScreen = ({ navigation }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://10.0.35.193:3000/${endpoint}`);
+      const response = await fetch(`http://192.168.1.70:3000/${endpoint}`);
       let json = await response.json();
       if (endpoint === "Exchanges") {
         json = json.sort((a, b) => b.trust_score - a.trust_score);
@@ -92,6 +117,26 @@ const MarketScreen = ({ navigation }) => {
           </Text>
         </View>
       </View>
+    );
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout Confirmation",
+      "Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          onPress: () => {
+            navigation.navigate("Landing");
+          },
+        },
+      ],
+      { cancelable: false }
     );
   };
 
@@ -148,18 +193,77 @@ const MarketScreen = ({ navigation }) => {
       />
     );
   };
-  const Seperator = () => <View style={styles.Seperator} />;
+  const Separator = () => <View style={styles.separator} />;
 
   return (
     <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.menu,
+          {
+            transform: [{ translateX: menuAnimation }],
+          },
+        ]}
+      >
+          <View style={styles.content1}>
+          <Text style={styles.welcome}>Hi, {user ? user.username : "Guest"}</Text>
+          <Text style={{ paddingLeft: 2,}}>{user.email}</Text>
+          <View style={styles.box}>
+          <TouchableOpacity onPress={() => navigation.navigate('Account')}>
+              <Text style={styles.text3}>Account</Text>
+            </TouchableOpacity>
+          </View> 
+          <View style={styles.box}>
+            <TouchableOpacity onPress={() => Linking.openURL('https://www.cryptrail.pt/support.html')}>
+              <Text style={styles.text2}>Support</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://www.cryptrail.pt/terms.html')}>
+              <Text style={styles.text2}>Terms and Conditions</Text>
+            </TouchableOpacity>
+          </View> 
+          <View style={styles.box}>
+            <TouchableOpacity onPress={handleLogout}>
+              <Text style={styles.text3}>Log Out</Text>
+            </TouchableOpacity>
+          </View> 
+          <View style={styles.links}>
+          <TouchableOpacity onPress={() => Linking.openURL('https://www.cryptrail.pt')}>
+              <Image source={require("../assets/site.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://instagram.com/rodrigo.lf6')}>
+              <Image source={require("../assets/instagram.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://github.com/LFtech6')}>
+              <Image source={require("../assets/github.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://www.linkedin.com/in/rodrigo-lopes-ferreira-238906236/')}>
+              <Image source={require("../assets/linkedin.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+          </View> 
+          </View>
+        </Animated.View>
+        <Animated.View
+        style={[
+          { flex: 1 },
+          {
+            transform: [{ translateX: contentAnimation }],
+          },
+        ]}
+      >
       <View style={{ flexDirection: "row" }}>
         <Image
           source={require("../assets/adaptive-icon.png")}
           style={styles.logo}
         />
         <Text style={styles.title}>Market</Text>
+        <TouchableOpacity style={styles.hamMenu} onPress={toggleMenu}>
+              <Image
+                style={styles.imageStyle}
+                source={require("../assets/profile.png")}
+              />
+            </TouchableOpacity>
       </View>
-      <Seperator />
+      <Separator />
       <KeyboardAvoidingView>
         <View style={styles.searchBarContainer}>
           <View style={styles.searchArea}>
@@ -249,12 +353,13 @@ const MarketScreen = ({ navigation }) => {
         )}
       </View>
       {renderContent()}
+      </Animated.View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  Seperator: {
+  separator: {
     height: 1,
     backgroundColor: "#FFD464",
     width: "100%",
@@ -264,6 +369,70 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 80,
     padding: 10,
+    backgroundColor: "#fff",
+  },
+  hamMenu: {
+    position: "absolute",
+    right: 0,
+    top: 31,
+    padding: 20,
+  },
+  imageStyle: {
+    width: 30,
+    height: 30,
+  },
+  menu: {
+    position: 'absolute',
+    backgroundColor: '#E4E3E3',
+    width: 300,
+    height: '100%',
+    right: 0,
+    padding: 20,
+    zIndex: 2,
+  },
+  welcome: {
+    fontSize: responsiveFontSize(4),
+    fontWeight: "bold",
+    marginTop: 70,
+  },
+  content: {
+    marginTop: 10,
+    paddingTop: 40,
+  },
+  box: {
+    padding: 10,
+    marginTop: 60,
+    borderRadius: 20,
+    backgroundColor: "#D3D3D3",
+  },
+  text1: {
+    fontSize: responsiveFontSize(1.4),
+    fontWeight: "bold",
+    color: "white",
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  text2: {
+    fontSize: responsiveFontSize(1.4),
+    fontWeight: "bold",
+    color: "white",
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  text3: {
+    fontSize: responsiveFontSize(1.4),
+    fontWeight: "bold",
+    color: "white",
+  },
+  links: {
+    flexDirection: "row",
+    padding: 10,
+    justifyContent: "space-around",
+    marginTop: 100,
+  },
+  socialM: {
+    width: responsiveWidth(5),
+    height: responsiveWidth(5),
   },
   logo: {
     width: responsiveWidth(9),

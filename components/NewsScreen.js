@@ -19,14 +19,16 @@ import {
   responsiveScreenHeight,
 } from "react-native-responsive-dimensions";
 import axios from "axios";
+import { useUser } from "../UserContext";
 
 const NewsScreen = ({ navigation }) => {
   const [newsArticles, setNewsArticles] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [menuVisible, setMenuVisible] = useState(false);
-  const menuAnimation = useRef(new Animated.Value(responsiveWidth(75))).current;
+  const [isMenuVisible, setMenuVisible] = useState(false);
+  const menuAnimation = useRef(new Animated.Value(300)).current; // Assuming menu width is 300
   const contentAnimation = useRef(new Animated.Value(0)).current;
+  const { user, setUser } = useUser();
 
   const handleLogout = () => {
     Alert.alert(
@@ -51,7 +53,7 @@ const NewsScreen = ({ navigation }) => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://10.0.35.193:3000/news");
+      const response = await axios.get("http://192.168.1.70:3000/news");
       setNewsArticles(response.data || []);
     } catch (error) {
       console.error("Error fetching news:", error);
@@ -59,6 +61,22 @@ const NewsScreen = ({ navigation }) => {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  const toggleMenu = () => {
+    Animated.timing(menuAnimation, {
+      toValue: isMenuVisible ? 300 : 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(contentAnimation, {
+      toValue: isMenuVisible ? 0 : -300,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    setMenuVisible(!isMenuVisible);
   };
 
   const openLink = async (url) => {
@@ -73,23 +91,6 @@ const NewsScreen = ({ navigation }) => {
     fetchNews();
   }, []);
 
-  const toggleMenu = () => {
-    Animated.parallel([
-      Animated.timing(menuAnimation, {
-        toValue: menuVisible ? responsiveWidth(75) : 0, // Slide in menu or slide out
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(contentAnimation, {
-        toValue: menuVisible ? 0 : -responsiveWidth(75), // Shift content left or back to original position
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    setMenuVisible(!menuVisible);
-  };
-
   if (loading) {
     return (
       <View style={styles.container}>
@@ -102,12 +103,71 @@ const NewsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.menu,
+          {
+            transform: [{ translateX: menuAnimation }],
+          },
+        ]}
+      >
+          <View style={styles.content1}>
+          <Text style={styles.welcome}>Hi, {user ? user.username : "Guest"}</Text>
+          <Text style={{ paddingLeft: 2,}}>{user.email}</Text>
+          <View style={styles.box}>
+          <TouchableOpacity onPress={() => navigation.navigate('Account')}>
+              <Text style={styles.text3}>Account</Text>
+            </TouchableOpacity>
+          </View> 
+          <View style={styles.box}>
+            <TouchableOpacity onPress={() => Linking.openURL('https://www.cryptrail.pt/support.html')}>
+              <Text style={styles.text2}>Support</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://www.cryptrail.pt/terms.html')}>
+              <Text style={styles.text2}>Terms and Conditions</Text>
+            </TouchableOpacity>
+          </View> 
+          <View style={styles.box}>
+            <TouchableOpacity onPress={handleLogout}>
+              <Text style={styles.text3}>Log Out</Text>
+            </TouchableOpacity>
+          </View> 
+          <View style={styles.links}>
+          <TouchableOpacity onPress={() => Linking.openURL('https://www.cryptrail.pt')}>
+              <Image source={require("../assets/site.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://instagram.com/rodrigo.lf6')}>
+              <Image source={require("../assets/instagram.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://github.com/LFtech6')}>
+              <Image source={require("../assets/github.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('https://www.linkedin.com/in/rodrigo-lopes-ferreira-238906236/')}>
+              <Image source={require("../assets/linkedin.png")} style={styles.socialM}/>
+            </TouchableOpacity>
+          </View> 
+          </View>
+        </Animated.View>
+        <Animated.View
+        style={[
+          { flex: 1 },
+          {
+            transform: [{ translateX: contentAnimation }],
+          },
+        ]}
+      >
       <View style={{ flexDirection: "row" }}>
         <Image
           source={require("../assets/adaptive-icon.png")}
           style={styles.logo}
         />
         <Text style={styles.title}>News</Text>
+        <TouchableOpacity style={styles.hamMenu} onPress={toggleMenu}>
+              <Image
+                style={styles.imageStyle}
+                source={require("../assets/profile.png")}
+              />
+            </TouchableOpacity>
       </View>
       <Seperator />
       <ScrollView
@@ -137,6 +197,7 @@ const NewsScreen = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      </Animated.View>
     </View>
   );
 };
@@ -146,6 +207,70 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 40,
     padding: 10,
+    backgroundColor: "#fff",
+  },
+  hamMenu: {
+    position: "absolute",
+    right: 0,
+    top: 31,
+    padding: 20,
+  },
+  imageStyle: {
+    width: 30,
+    height: 30,
+  },
+  menu: {
+    position: 'absolute',
+    backgroundColor: '#E4E3E3',
+    width: 300,
+    height: '100%',
+    right: 0,
+    padding: 20,
+    zIndex: 2,
+  },
+  welcome: {
+    fontSize: responsiveFontSize(4),
+    fontWeight: "bold",
+    marginTop: 70,
+  },
+  content: {
+    marginTop: 10,
+    paddingTop: 40,
+  },
+  box: {
+    padding: 10,
+    marginTop: 60,
+    borderRadius: 20,
+    backgroundColor: "#D3D3D3",
+  },
+  text1: {
+    fontSize: responsiveFontSize(1.4),
+    fontWeight: "bold",
+    color: "white",
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  text2: {
+    fontSize: responsiveFontSize(1.4),
+    fontWeight: "bold",
+    color: "white",
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  text3: {
+    fontSize: responsiveFontSize(1.4),
+    fontWeight: "bold",
+    color: "white",
+  },
+  links: {
+    flexDirection: "row",
+    padding: 10,
+    justifyContent: "space-around",
+    marginTop: 100,
+  },
+  socialM: {
+    width: responsiveWidth(5),
+    height: responsiveWidth(5),
   },
   logo: {
     width: responsiveWidth(9),
@@ -184,8 +309,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
+    borderColor: "#FFD464",
+    borderWidth: 1,
   },
   article: {
+    borderColor: "#FFD464",
+    borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
@@ -201,6 +330,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   featuredImage: {
+    borderWidth: 1,
+    borderColor: "#FFD464",
     width: "100%",
     height: 200,
     resizeMode: "cover",
