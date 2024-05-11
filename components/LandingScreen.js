@@ -1,4 +1,4 @@
-//HomeScreen
+//LandingScreen.js
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFD464',
     width: '100%',
     height: '43%',
-    justifyContent: 'flex-end', // Adjust the alignment of items within the yellow background
+    justifyContent: 'flex-end',
     borderBottomLeftRadius: 63,
     borderBottomRightRadius: 63,
     paddingHorizontal: 20,

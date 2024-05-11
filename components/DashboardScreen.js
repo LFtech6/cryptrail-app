@@ -1,3 +1,4 @@
+//DashboardScreen.js
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -26,8 +27,8 @@ const Dashboard = ({ navigation }) => {
   const [rates, setRates] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [baseCurrency, setBaseCurrency] = useState("eur");
-  const [targetCurrency, setTargetCurrency] = useState("btc");
+  const [baseCurrency, setBaseCurrency] = useState("FIAT");
+  const [targetCurrency, setTargetCurrency] = useState("CRYPTO");
   const [result, setResult] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
@@ -69,7 +70,7 @@ const Dashboard = ({ navigation }) => {
     try {
       const response = await fetch(`http://192.168.1.70:3000/getConversions/${user.id}`);
       const data = await response.json();
-      setConversionHistory(data.reverse()); // Ensure the latest conversions are first
+      setConversionHistory(data.reverse());
     } catch (error) {
       console.error('Error fetching conversion history:', error);
     }
@@ -165,7 +166,7 @@ const Dashboard = ({ navigation }) => {
   };
 
   const handleInputChange = (text) => {
-    const numericValue = text.replace(/[^0-9.]/g, ''); // Allow only numbers and dots
+    const numericValue = text.replace(/[^0-9.]/g, '');
     setInputValue(numericValue);
     setShowBuyButton(false);
     setResult("");
@@ -321,7 +322,7 @@ const Dashboard = ({ navigation }) => {
             {conversionHistory.length > 6 && (
               <TouchableOpacity
                 style={styles.seeMoreButton}
-                onPress={() => navigation.navigate("FullHistory", { history: conversionHistory })}
+                onPress={() => navigation.navigate("FullHistory", { history: conversionHistory, userId: user.id })}
               >
                 <Text style={styles.seeMoreText}>See more</Text>
               </TouchableOpacity>
@@ -332,6 +333,7 @@ const Dashboard = ({ navigation }) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   separator: {
@@ -344,7 +346,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 80,
     padding: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
   },
   hamMenu: {
     position: "absolute",
@@ -452,10 +454,10 @@ const styles = StyleSheet.create({
     marginTop: -30,
   },
   input: {
-    flex: 1, // Allows the input to grow and fill the space
+    flex: 1,
     borderRadius: 8,
-    marginLeft: 20, // Add some left margin for spacing from the border
-    marginRight: 5, // Small right margin for spacing between text and input
+    marginLeft: 20,
+    marginRight: 5,
     fontSize: 14,
   },
   dropdownC: {
@@ -481,7 +483,7 @@ const styles = StyleSheet.create({
     marginTop: -5,
   },
   convertButton: {
-    backgroundColor: "#007bff", // A bright blue for the main action button
+    backgroundColor: "#007bff",
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
@@ -492,11 +494,11 @@ const styles = StyleSheet.create({
   },
   convertButtonText: {
     fontSize: responsiveFontSize(1.7),
-    color: "#ffffff", // White text on the button for contrast
+    color: "#ffffff",
     fontWeight: "bold",
   },
   button: {
-    backgroundColor: "#007bff", // A bright blue for the main action button
+    backgroundColor: "#007bff",
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
@@ -512,7 +514,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: responsiveFontSize(1.7),
-    color: "#ffffff", // White text on the button for contrast
+    color: "#ffffff",
     fontWeight: "bold",
   },
   centeredView: {
@@ -553,18 +555,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   historyItem: {
-    flex: 1, // Added for flex items in flat list
-    margin: 5, // Add margin for spacing between tiles
-    padding: 20, // Increased padding for better visual separation
-    marginBottom: -15, // Space between history items
-    alignItems: 'center', // Center the text inside the tile
-    justifyContent: 'center', // Align text vertically
-    minHeight: 120, // Ensure there is enough space for icon and text
+    flex: 1,
+    margin: 5,
+    padding: 20,
+    marginBottom: -15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 120,
   },
   convertIcon: {
     width: 20,
     height: 20,
-    marginBottom: 10, // Space between the icon and text
+    marginBottom: 10,
   },
   historyText: {
     fontSize: 12,
@@ -572,10 +574,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   historyContainer: {
-    flexDirection: 'row', // Ensure container allows for multiple columns
-    flexWrap: 'wrap', // Allow items to wrap in container
-    alignItems: 'flex-end', // Align children (the button) to the bottom right
-    justifyContent: 'space-between', // Space between history and button
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
   },
   seeMoreButton: {
     padding: 10,

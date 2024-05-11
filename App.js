@@ -1,3 +1,4 @@
+//App.js 
 import * as React from "react";
 import { Image, Text } from "react-native";
 import { UserProvider } from "./UserContext";
@@ -18,9 +19,9 @@ import BuyPlacesScreen from "./components/BuyPlacesScreen";
 import FullHistory from "./components/FullHistory";
 import AccountScreen from "./components/AccountScreen";
 
-// Linking configuration using the Expo deep link for development
+
 const linking = {
-  prefixes: ['exp://192.168.1.70:8081'], // Use your local IP and port as shown in Expo
+  prefixes: ['exp://192.168.1.70:8081'],
   config: {
     screens: {
       GetStartedScreen: 'getstarted',
@@ -48,7 +49,7 @@ function ShowBottomTabs() {
     zIndex: 0,
     backgroundColor: '#fff',
     headerShown: false,
-    tabBarShowLabel: false, // Set this to false if you do not want to show the label
+    tabBarShowLabel: false,
     tabBarStyle: {
       backgroundColor: '#fff',
       position: 'absolute',
@@ -63,9 +64,9 @@ function ShowBottomTabs() {
     tabBarItemStyle: {
       backgroundColor: '#fff',
       width: '100%',
-      justifyContent: 'center', // Center items within the tab bar button
-      alignItems: 'center', // Center items vertically within the tab bar button
-      padding: 0, // Reset padding to ensure icons are centered
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 0,
     },
   }}
 >

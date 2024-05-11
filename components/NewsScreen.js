@@ -1,3 +1,4 @@
+//NewsScreen.js
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -26,7 +27,7 @@ const NewsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMenuVisible, setMenuVisible] = useState(false);
-  const menuAnimation = useRef(new Animated.Value(300)).current; // Assuming menu width is 300
+  const menuAnimation = useRef(new Animated.Value(300)).current;
   const contentAnimation = useRef(new Animated.Value(0)).current;
   const { user, setUser } = useUser();
 

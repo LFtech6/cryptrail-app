@@ -1,3 +1,4 @@
+//LoginScreen.js
 import React, { useState, useEffect } from "react";
 import {
   Alert,
@@ -27,7 +28,7 @@ import { useUser } from "../UserContext";
 const SigninScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setUser } = useUser(); // Use the user context to set user data
+  const { setUser } = useUser();
   const [isClicked, setIsClicked] = useState(false);
 
   const handleLogin = async () => {
@@ -39,13 +40,13 @@ const SigninScreen = ({ navigation }) => {
       if (response.data.user) {
         const userData = response.data.user;
 
-        // Store user details and password in AsyncStorage
+       
         await AsyncStorage.setItem("userId", JSON.stringify(userData.id));
         await AsyncStorage.setItem("username", userData.username);
         await AsyncStorage.setItem("email", userData.email);
-        await AsyncStorage.setItem("password", password); // Store the plain password
+        await AsyncStorage.setItem("password", password);
 
-        setUser(userData); // Update the user context
+        setUser(userData);
         navigation.navigate("Dashboard0");
       }
     } catch (error) {
@@ -56,7 +57,7 @@ const SigninScreen = ({ navigation }) => {
     }
   };
 
-  //login requirements
+ 
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
 
@@ -66,34 +67,26 @@ const SigninScreen = ({ navigation }) => {
 
   const validateForm = () => {
     let errors = {};
-    // Validate email field
+   
     if (!email) {
       errors.email = "Email is required.";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       errors.email = "Email is invalid.";
     }
 
-    // Validate password field
+   
     if (!password) {
       errors.password = "Password is required.";
     } else if (password.length < 8) {
       errors.password = "Password must be at least 8 characters.";
     }
 
-    // Set the errors and update form validity
+   
     setErrors(errors);
     setIsFormValid(Object.keys(errors).length === 0);
   };
 
-  const handleSubmit = () => {
-    if (isFormValid) {
-      console.log("Form submitted successfully!");
-    } else {
-      console.log("Form has errors. Please correct them.");
-    }
-  };
-
-  //hide and unhide password
+ 
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleShowPassword = () => {
@@ -117,7 +110,8 @@ const SigninScreen = ({ navigation }) => {
               style={styles.placeholder}
               placeholder="Email"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => setEmail(text.toLowerCase())}
+              autoCapitalize="none"
             />
             <TextInput
               secureTextEntry={!showPassword}
@@ -152,7 +146,6 @@ const SigninScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </SafeAreaView>
-          {/* Display error messages */}
           {Object.values(errors).map((error, index) => (
             <Text key={index} style={styles.error}>
               {error}
@@ -167,7 +160,6 @@ const SigninScreen = ({ navigation }) => {
   );
 };
 
-//styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,

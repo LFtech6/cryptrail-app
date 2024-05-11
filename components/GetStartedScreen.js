@@ -1,3 +1,4 @@
+//GetStartedScreen.js
 import React, { useState } from "react";
 import { View, Image, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 
@@ -19,7 +20,7 @@ const PaginationIndicator = ({ totalPages, currentPage }) => {
   );
 };
 
-const GetStartedScreen2 = ({ navigation }) => {
+const GetStartedScreen = ({ navigation }) => {
   const [currentPage, setCurrentPage] = useState(0);
 
   const handleScroll = (event) => {
@@ -76,7 +77,7 @@ const GetStartedScreen2 = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   scrollView: {
-    backgroundColor: "#FFD464", // Make the background color consistent
+    backgroundColor: "#FFD464",
   },
   container: {
     flex: 1,
@@ -87,14 +88,14 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 100,
-    fontSize: 43, // Increase font size
+    fontSize: 43,
     fontWeight: "bold",
-    paddingHorizontal: 10, // Add horizontal padding
+    paddingHorizontal: 10,
   },
   stitle: {
-    fontSize: 43, // Increase font size
+    fontSize: 43,
     fontWeight: "bold",
-    paddingHorizontal: 10, // Add horizontal padding
+    paddingHorizontal: 10,
     marginTop: 15,
   },
   logo: {
@@ -105,10 +106,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   description: {
-    fontSize: 18, // Increase font size for readability
-    color: "#333", // Make text color darker for better contrast
+    fontSize: 18,
+    color: "#333",
     marginTop: 100,
-    paddingHorizontal: 10, // Add horizontal padding
+    paddingHorizontal: 10,
   },
   next: {
     width: 22,
@@ -133,13 +134,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   paginationLine: {
-    width: width * 0.3, // Length of the line
-    height: 4, // Thickness of the line
-    backgroundColor: "#a9a9a9", // Inactive color
+    width: width * 0.3,
+    height: 4,
+    backgroundColor: "#a9a9a9",
     marginHorizontal: 2,
   },
   paginationLineActive: {
-    backgroundColor: "#000", // Active color
+    backgroundColor: "#000",
   },
   container: {
     flex: 1,
@@ -147,4 +148,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GetStartedScreen2;
+export default GetStartedScreen;

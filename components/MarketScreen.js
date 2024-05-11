@@ -1,3 +1,4 @@
+//MarketScreen.js
 import React, { useState, useEffect, useRef } from "react";
 import {
   Image,
@@ -27,13 +28,13 @@ const MarketScreen = ({ navigation }) => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [sortDescending, setSortDescending] = useState(true); // New state to track sorting order
+  const [sortDescending, setSortDescending] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [items, setItems] = useState([]); // Your items here
+  const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [isMenuVisible, setMenuVisible] = useState(false);
-  const menuAnimation = useRef(new Animated.Value(300)).current; // Assuming menu width is 300
+  const menuAnimation = useRef(new Animated.Value(300)).current;
   const contentAnimation = useRef(new Animated.Value(0)).current;
   const { user, setUser } = useUser();
 
@@ -82,8 +83,8 @@ const MarketScreen = ({ navigation }) => {
         json = sortData(json);
       }
       setData(json);
-      setItems(json); // Set items from fetched data
-      setFilteredItems(json); // Initially filteredItems will show all items
+      setItems(json);
+      setFilteredItems(json);
     } catch (error) {
       setError(`Failed to fetch ${endpoint}. Please try again later.`);
       console.error(error);
@@ -472,7 +473,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: responsiveWidth(4),
     paddingVertical: responsiveScreenHeight(1),
     borderRadius: 10,
-    marginLeft: -responsiveWidth(10), // Adjust this to overlap the button onto the text input
+    marginLeft: -responsiveWidth(10),
   },
   toggleButtonText: {
     fontSize: responsiveFontSize(2),
@@ -496,16 +497,16 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
     elevation: 5,
     position: "absolute",
-    top: 170, // Adjust the position accordingly
+    top: 170,
     right: 10,
   },
   modalButton: {
     padding: 10,
-    // Add styles for your button
+   
   },
   modalText: {
     textAlign: "center",
-    // Add styles for your text
+   
   },
   content: {
     flex: 1,
@@ -514,18 +515,18 @@ const styles = StyleSheet.create({
   listItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: responsiveScreenHeight(1), // Smaller padding
-    paddingHorizontal: responsiveWidth(2), // Smaller padding
+    paddingVertical: responsiveScreenHeight(1),
+    paddingHorizontal: responsiveWidth(2),
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
   },
   coinNumber: {
-    fontSize: responsiveFontSize(1.5), // Smaller font size
-    width: responsiveWidth(7), // Fixed width for alignment
-    textAlign: "center", // Center text
+    fontSize: responsiveFontSize(1.5),
+    width: responsiveWidth(7),
+    textAlign: "center",
   },
   coinImage: {
-    width: responsiveWidth(8), // Smaller size
+    width: responsiveWidth(8),
     height: responsiveWidth(8),
     borderRadius: responsiveWidth(4),
     marginRight: responsiveWidth(2),
@@ -538,17 +539,17 @@ const styles = StyleSheet.create({
   coinCap: {
     fontSize: responsiveFontSize(0.9),
     color: "#333",
-    marginTop: responsiveScreenHeight(0.5), // Space between name and market cap
+    marginTop: responsiveScreenHeight(0.5),
   },
   coinPrice: {
     fontSize: responsiveFontSize(1.6),
     color: "#333",
-    marginLeft: responsiveWidth(7), // Align with Rating header
+    marginLeft: responsiveWidth(7),
   },
   variation: {
     fontSize: responsiveFontSize(1.6),
     color: "#333",
-    marginLeft: responsiveWidth(12), // Align with Rating header
+    marginLeft: responsiveWidth(12),
   },
   exchangeImage: {
     width: responsiveWidth(8),
@@ -564,21 +565,21 @@ const styles = StyleSheet.create({
   exchangeTrade: {
     fontSize: responsiveFontSize(1.6),
     color: "#333",
-    marginLeft: responsiveWidth(1), // Align with Rating header
+    marginLeft: responsiveWidth(1),
   },
   variationE: {
     fontSize: responsiveFontSize(1.6),
     color: "#333",
-    marginLeft: responsiveWidth(20), // Align with Rating header
+    marginLeft: responsiveWidth(20),
   },
   headerNumber: {
     fontSize: responsiveFontSize(1.8),
-    width: responsiveWidth(2), // Align with # column
+    width: responsiveWidth(2),
     textAlign: "center",
   },
   headerTitle: {
     fontSize: responsiveFontSize(1.8),
-    marginRight: responsiveWidth(2), // Align headers with content
+    marginRight: responsiveWidth(2),
   },
   headerPercentage: {
     fontSize: responsiveFontSize(1.8),
@@ -592,7 +593,7 @@ const styles = StyleSheet.create({
   headerButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: responsiveWidth(2), // Spacing between headers
+    marginRight: responsiveWidth(2),
   },
   organizer: {
     width: 10,

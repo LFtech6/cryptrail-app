@@ -1,3 +1,4 @@
+//BuyPlacesScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import axios from 'axios';
@@ -64,6 +65,7 @@ const BuyPlacesPage = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: 'white',
     flex: 1,
     padding: 10,
     marginTop: responsiveScreenHeight(5),

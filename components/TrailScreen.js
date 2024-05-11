@@ -1,3 +1,4 @@
+//TrailScreen.js
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -27,9 +28,9 @@ const TrailScreen = ({ navigation }) => {
   const [inputText, setInputText] = useState("");
   const [isBotWriting, setIsBotWriting] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
-  const menuAnimation = useRef(new Animated.Value(300)).current; // Assuming menu width is 300
+  const menuAnimation = useRef(new Animated.Value(300)).current;
   const contentAnimation = useRef(new Animated.Value(0)).current;
-  const [hasSentMessage, setHasSentMessage] = useState(false); // New state to track if any message has been sent
+  const [hasSentMessage, setHasSentMessage] = useState(false);
   const { user, setUser } = useUser();
 
   useEffect(() => {
@@ -92,18 +93,18 @@ const TrailScreen = ({ navigation }) => {
       const updatedMessages = [...messages, userMessage, botMessage];
 
       setMessages(updatedMessages);
-      setIsBotWriting(false); // Set bot writing to false
-      setHasSentMessage(true); // Update the state here after sending a message
+      setIsBotWriting(false);
+      setHasSentMessage(true);
 
 
-      // Save the conversation
+     
       await saveConversation(user.id, updatedMessages);
 
-      // Clear the input field
+     
       setInputText("");
     } catch (error) {
       console.error("Error sending or saving message:", error);
-      setIsBotWriting(false); // Set bot writing to false in case of error
+      setIsBotWriting(false);
     }
   };
 
@@ -125,7 +126,7 @@ const TrailScreen = ({ navigation }) => {
                 `http://192.168.1.70:3000/conversations/${user.id}`
               );
               setMessages([]);
-              setHasSentMessage(false); // Reset hasSentMessage to false to show default questions again
+              setHasSentMessage(false);
             } catch (error) {
               console.error("Error clearing messages:", error);
             }
@@ -181,16 +182,16 @@ const TrailScreen = ({ navigation }) => {
     "What is blockchain?",
     "Who was the first person ever buying bitcoin?",
     "Who is Satoshi Nakamoto?",
-    // Add more questions as needed
+   
   ];
   
   const validateMessageContent = (content) => {
     if (typeof content === "string") {
       return content;
     }
-    // Log unexpected content types for debugging
+   
     console.warn("Invalid content type:", typeof content, content);
-    return ""; // Return an empty string or some placeholder text
+    return "";
   };
 
   const clearInput = () => setInputText("");

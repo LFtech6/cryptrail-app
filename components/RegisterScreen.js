@@ -1,3 +1,4 @@
+//RegisterScreen.js
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, TextInput, TouchableWithoutFeedback, Image, Keyboard, SafeAreaView, Alert } from 'react-native';
 import axios from 'axios';
@@ -87,7 +88,8 @@ const SignupScreen = ({ navigation }) => {
               style={styles.placeholder}
               placeholder="Email"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => setEmail(text.toLowerCase())}
+              autoCapitalize="none"
             />
             <TextInput
               secureTextEntry={!showPassword}
@@ -181,6 +183,7 @@ const styles = StyleSheet.create({
     height: 24,
   },
   write: {
+    marginTop: 60,
     alignItems: 'center', 
   },
   placeholder: {
