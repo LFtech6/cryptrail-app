@@ -43,7 +43,7 @@ const SignupScreen = ({ navigation }) => {
 
   const sendToReg = async () => {
     try {
-      const response = await axios.post('http://192.168.1.70:3000/register', {
+      const response = await axios.post('http://192.168.1.191:3000/register', {
         username: name,
         email: email,
         password: password

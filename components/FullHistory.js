@@ -26,7 +26,7 @@ const FullHistory = ({ route, navigation }) => {
     }
 
     try {
-      const response = await axios.delete(`http://192.168.1.70:3000/conversions/${parsedUserId}`);
+      const response = await axios.delete(`http://192.168.1.191:3000/conversions/${parsedUserId}`);
       if (response.status === 200) {
         Alert.alert("Success", "Conversion history deleted successfully.");
         setCurrentHistory([]);

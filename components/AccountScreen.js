@@ -59,38 +59,7 @@ const AccountScreen = ({ navigation }) => {
           <Text style={styles.label}>Email:</Text>
           <Text style={styles.value}>{user.email}</Text>
         </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Password:</Text>
-          {showPassword ? (
-            <Text style={styles.value}>{password}</Text>
-          ) : (
-            <Text style={styles.value}>******</Text>
-          )}
         </View>
-      </View>
-      <View style={{ flex: 1.8 }}>
-        {!showPassword && (
-          <View style={styles.pinContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter PIN to reveal password"
-              value={enteredPin}
-              onChangeText={setEnteredPin}
-              keyboardType="numeric"
-              maxLength={4}
-            />
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleRevealPassword}
-            >
-              <Text style={styles.buttonText}>Reveal Password</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
-        <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };

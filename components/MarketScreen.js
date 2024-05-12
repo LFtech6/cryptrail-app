@@ -75,7 +75,7 @@ const MarketScreen = ({ navigation }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://192.168.1.70:3000/${endpoint}`);
+      const response = await fetch(`http://192.168.1.191:3000/${endpoint}`);
       let json = await response.json();
       if (endpoint === "Exchanges") {
         json = json.sort((a, b) => b.trust_score - a.trust_score);
@@ -270,7 +270,7 @@ const MarketScreen = ({ navigation }) => {
           <View style={styles.searchArea}>
             <TextInput
               style={styles.searchBar}
-              placeholder="Search for assets"
+              placeholder="Search"
               value={searchTerm}
               onChangeText={handleSearch}
             />
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   variationE: {
     fontSize: responsiveFontSize(1.6),
     color: "#333",
-    marginLeft: responsiveWidth(20),
+    marginLeft: responsiveWidth(19),
   },
   headerNumber: {
     fontSize: responsiveFontSize(1.8),

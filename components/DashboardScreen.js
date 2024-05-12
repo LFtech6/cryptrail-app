@@ -68,7 +68,7 @@ const Dashboard = ({ navigation }) => {
   const fetchConversionHistory = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`http://192.168.1.70:3000/getConversions/${user.id}`);
+      const response = await fetch(`http://192.168.1.191:3000/getConversions/${user.id}`);
       const data = await response.json();
       setConversionHistory(data.reverse());
     } catch (error) {
@@ -80,7 +80,7 @@ const Dashboard = ({ navigation }) => {
     const fetchInitialRates = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch("http://192.168.1.70:3000/rates");
+        const response = await fetch("http://192.168.1.191:3000/rates");
         const jsonData = await response.json();
         setRates(jsonData);
       } catch (error) {
@@ -120,14 +120,14 @@ const Dashboard = ({ navigation }) => {
     setIsLoading(true);
     try {
       const query = `base=${baseCurrency}&target=${targetCurrency}&amount=${inputValue}`;
-      const response = await fetch(`http://192.168.1.70:3000/convert?${query}`);
+      const response = await fetch(`http://192.168.1.191:3000/convert?${query}`);
       const data = await response.json();
 
       if (data.convertedAmount) {
         setResult(data.convertedAmount);
         addToHistory(baseCurrency, targetCurrency, inputValue, data.convertedAmount);
 
-        await fetch('http://192.168.1.70:3000/saveConversion', {
+        await fetch('http://192.168.1.191:3000/saveConversion', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
