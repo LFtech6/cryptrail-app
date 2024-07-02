@@ -75,7 +75,7 @@ const MarketScreen = ({ navigation }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://192.168.1.191:3000/${endpoint}`);
+      const response = await fetch(`http://192.168.8.153:3000/${endpoint}`);
       let json = await response.json();
       if (endpoint === "Exchanges") {
         json = json.sort((a, b) => b.trust_score - a.trust_score);

@@ -13,7 +13,7 @@ const BuyPlacesPage = ({ route }) => {
     const fetchExchanges = async () => {
       setIsLoading(true);
       try {
-        const url = `http://192.168.1.191:3000/exchanges?currency=${cryptoCurrency}`;
+        const url = `http://192.168.8.153:3000/exchanges?currency=${cryptoCurrency}`;
         const response = await axios.get(url);
         if (response.data.length > 0) {
           let exchangesWithFees = response.data.map(exchange => {

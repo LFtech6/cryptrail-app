@@ -21,7 +21,7 @@ import AccountScreen from "./components/AccountScreen";
 
 
 const linking = {
-  prefixes: ['exp://192.168.1.191:8081'],
+  prefixes: ['exp://192.168.8.153:8081'],
   config: {
     screens: {
       GetStartedScreen: 'getstarted',

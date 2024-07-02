@@ -42,7 +42,7 @@ const TrailScreen = ({ navigation }) => {
   const fetchMessages = async (userId) => {
     try {
       const response = await axios.get(
-        `http://192.168.1.191:3000/conversations/${userId}`
+        `http://192.168.8.153:3000/conversations/${userId}`
       );
       setMessages(response.data);
     } catch (error) {
@@ -53,7 +53,7 @@ const TrailScreen = ({ navigation }) => {
   const saveConversation = async (userId, conversationContent) => {
     try {
       const response = await axios.post(
-        "http://192.168.1.191:3000/saveConversation",
+        "http://192.168.8.153:3000/saveConversation",
         {
           userId,
           content: conversationContent,
@@ -123,7 +123,7 @@ const TrailScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               await axios.delete(
-                `http://192.168.1.191:3000/conversations/${user.id}`
+                `http://192.168.8.153:3000/conversations/${user.id}`
               );
               setMessages([]);
               setHasSentMessage(false);

@@ -54,7 +54,7 @@ const NewsScreen = ({ navigation }) => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://192.168.1.191:3000/news");
+      const response = await axios.get("http://192.168.8.153:3000/news");
       setNewsArticles(response.data || []);
     } catch (error) {
       console.error("Error fetching news:", error);

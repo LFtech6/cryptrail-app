@@ -53,7 +53,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
   const handleResetPassword = async () => {
     try {
-      const response = await axios.post('http://192.168.1.191:3000/resetPassword', {
+      const response = await axios.post('http://192.168.8.153:3000/resetPassword', {
         email,
         pin,
         newPassword
